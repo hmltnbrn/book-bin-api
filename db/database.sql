@@ -30,7 +30,7 @@ CREATE TABLE users (
   username TEXT,
   password TEXT,
   salt TEXT,
-  valid BOOLEAN NOT NULL DEFAULT TRUE
+  valid BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE user_roles (
@@ -48,6 +48,37 @@ CREATE TABLE user_details (
   school_name TEXT,
   role_id INTEGER REFERENCES user_roles (id)
 );
+
+CREATE OR REPLACE FUNCTION sign_up(u_input TEXT, p_input TEXT, fn_input TEXT, ln_input TEXT, e_input TEXT, z_input TEXT, sn_input TEXT, r_input INTEGER)
+RETURNS BOOLEAN AS $$
+DECLARE
+    gen_user_id TEXT;
+    gen_user_salt TEXT;
+    hashed_pass TEXT;
+BEGIN
+    IF EXISTS(SELECT u.username FROM users u, user_details d WHERE u.id = d.user_id AND (u.username = $1 OR d.email = $5)) THEN
+        RETURN FALSE;
+    END IF;
+    SELECT * INTO gen_user_id FROM encode(gen_random_bytes(16), 'hex');
+    SELECT * INTO gen_user_salt FROM gen_salt('bf');
+    SELECT * INTO hashed_pass FROM encode(digest($2 || gen_user_salt, 'sha256'), 'hex');
+    INSERT INTO users (id, username, password, salt) VALUES (gen_user_id, $1, hashed_pass, gen_user_salt);
+    INSERT INTO user_details (user_id, first_name, last_name, email, zip, school_name, role_id) VALUES (gen_user_id, $3, $4, $5, $6, $7, $8);
+    RETURN TRUE;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION sign_in(u_input TEXT, p_input TEXT)
+RETURNS TABLE(id TEXT, username TEXT) AS $$
+DECLARE
+    user_salt TEXT;
+    hashed_pass TEXT;
+BEGIN
+    SELECT u.salt INTO user_salt FROM users u WHERE u.username = $1;
+    SELECT * INTO hashed_pass FROM encode(digest($2 || user_salt, 'sha256'), 'hex');
+    RETURN QUERY SELECT u.id, u.username FROM users u WHERE u.username = $1 AND u.password = hashed_pass;
+END
+$$ LANGUAGE plpgsql;
 
 INSERT INTO students (name, class, active) VALUES
  ('Kevin Costner','601',TRUE)

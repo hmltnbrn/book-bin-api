@@ -31,8 +31,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 
-app.route('/auth/register')
-  .post(auth.register);
+app.route('/auth/signup')
+  .post(auth.signup);
 
 app.route('/auth/signin')
   .post(auth.signin);

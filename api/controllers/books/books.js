@@ -1,5 +1,7 @@
 let db = require('../../../db');
 
+let escape = s => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+
 exports.GetAll = function (req, res, next) {
 
   let pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 12,
@@ -30,11 +32,11 @@ exports.GetAll = function (req, res, next) {
       return db.query(sql, values.concat([pageSize, ((page - 1) * pageSize)]))
     })
     .then(books => {
-      return res.json({"pageSize": pageSize, "page": page, "total": total, "books": books});
+      return res.status(200).json({"pageSize": pageSize, "page": page, "total": total, "books": books});
     })
     .catch(err => {
       console.log(err);
-      return res.json({ message: err });
+      return res.status(500).json({ status: false, message: err.message });
     });
 
 }

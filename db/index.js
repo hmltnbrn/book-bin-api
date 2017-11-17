@@ -4,11 +4,10 @@ let pg = require('pg'),
     config = require('./config'),
     databaseURL = config.databaseURL;
 
-exports.query = function (sql, values, singleItem, dontLog) {
+exports.query = function (sql, values, singleItem, logText) {
 
-  if (!dontLog) {
-    console.log(sql, values);
-  }
+  if (!logText) console.log(sql, values);
+  else console.log(logText);
 
   const client = new pg.Client({
     connectionString: databaseURL
