@@ -10,13 +10,13 @@ var app = express();
 
 app.use(cors());
 
-var index = require('./routes/index');
-var auth = require('./auth');
-var api = require('./api')(app);
-
 require('dotenv-safe').load({
   allowEmptyValues: true
 });
+
+var index = require('./routes/index');
+var auth = require('./auth');
+var api = require('./api')(app);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -32,10 +32,19 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', index);
 
 app.route('/auth/signup')
-  .post(auth.signup);
+  .post(auth.signUp);
 
 app.route('/auth/signin')
-  .post(auth.signin);
+  .post(auth.signIn);
+
+app.route('/auth/activate')
+  .post(auth.activateAccount);
+
+app.route('/auth/forgotpassword')
+  .post(auth.forgotPassword);
+
+app.route('/auth/resetpassword')
+  .post(auth.resetPassword);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
