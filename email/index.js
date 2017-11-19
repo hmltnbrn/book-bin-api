@@ -15,11 +15,11 @@ let transporter = nodemailer.createTransport({
   }
 });
 
-let domain = process.env.NODE_ENV == 'production' ? process.env.PROD_URL : process.env.DEV_URL;
+let baseUrl = process.env.NODE_ENV == 'production' ? process.env.PROD_URL : process.env.DEV_URL;
 
 exports.activateAccount = function (username, email, token, cb) {
 
-  let url = domain + '/activate-account/'+ token;
+  let url = baseUrl + '/activate-account/'+ token;
 
   let bodyText = 'Hello, ' + username + '!\n\nPlease follow the link below to activate your account:\n\n' + url + '\n\nSincerely,\nThe Classroom Library';
   let bodyHTML = 'Hello, ' + username + '!<br/><br/>Please follow the link below to activate your account:<br/><br/>' + url + '<br/><br/>Sincerely,<br/>The Classroom Library';
@@ -58,7 +58,7 @@ exports.activateAccount = function (username, email, token, cb) {
 
 exports.resetPassword = function (email, token, cb) {
 
-  let url = domain + '/reset-password?email=' + email + '&token=' + token;
+  let url = baseUrl + '/reset-password?email=' + email + '&token=' + token;
 
   let bodyText = 'Hello, user!\n\nPlease follow the link below to reset your password:\n\n' + url + '\n\nSincerely,\nThe Classroom Library';
   let bodyHTML = 'Hello, user!<br/><br/>Please follow the link below to reset your password:<br/><br/>' + url + '<br/><br/>Sincerely,<br/>The Classroom Library';
