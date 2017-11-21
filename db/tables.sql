@@ -3,36 +3,48 @@ CREATE TABLE users (
   username TEXT,
   password TEXT,
   salt TEXT,
+  role_id INTEGER REFERENCES user_roles (id),
   activated BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE user_roles (
   id SERIAL PRIMARY KEY NOT NULL,
   name TEXT
+); /* Teachers, Librarians */
+
+CREATE TABLE teachers (
+  id SERIAL PRIMARY KEY NOT NULL,
+  user_id TEXT REFERENCES users (id)
 );
 
-CREATE TABLE user_details (
+CREATE TABLE librarians (
+  id SERIAL PRIMARY KEY NOT NULL,
+  user_id TEXT REFERENCES users (id)
+);
+
+CREATE TABLE teacher_details (
   id SERIAL PRIMARY KEY NOT NULL,
   user_id TEXT REFERENCES users (id),
   first_name TEXT,
   last_name TEXT,
   email TEXT,
   zip TEXT,
-  school_name TEXT,
-  role_id INTEGER REFERENCES user_roles (id)
+  school_name TEXT
 );
 
 CREATE TABLE books (
   id SERIAL PRIMARY KEY NOT NULL,
   title TEXT,
-  author TEXT
+  author TEXT,
+  genre TEXT,
+  reading_level TEXT
 );
 
 CREATE TABLE user_books (
   id SERIAL PRIMARY KEY NOT NULL,
   user_id TEXT REFERENCES users (id),
   genre TEXT,
-  level TEXT,
+  reading_level TEXT,
   number_in INTEGER,
   number_out INTEGER,
   available BOOLEAN
@@ -48,6 +60,8 @@ CREATE TABLE students (
   id SERIAL PRIMARY KEY NOT NULL,
   first_name TEXT,
   last_name TEXT,
+  email TEXT,
+  reading_level TEXT,
   class_id INTEGER REFERENCES classes (id),
   active BOOLEAN
 );
