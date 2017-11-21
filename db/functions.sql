@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION cl_sign_up(u_input TEXT, p_input TEXT, fn_input TEXT, ln_input TEXT, e_input TEXT, z_input TEXT, sn_input TEXT, r_input INTEGER)
+CREATE OR REPLACE FUNCTION cl_sign_up(u_input TEXT, p_input TEXT, t_input TEXT, fn_input TEXT, ln_input TEXT, e_input TEXT, z_input TEXT, sn_input TEXT, r_input INTEGER)
 RETURNS TEXT AS $$
 DECLARE
     gen_user_id TEXT;
@@ -14,7 +14,7 @@ BEGIN
     SELECT * INTO hashed_pass FROM encode(digest($2 || gen_user_salt, 'sha256'), 'hex');
     SELECT * INTO activation_token FROM encode(gen_random_bytes(16), 'hex');
     INSERT INTO users (id, username, password, salt) VALUES (gen_user_id, $1, hashed_pass, gen_user_salt);
-    INSERT INTO user_details (user_id, first_name, last_name, email, zip, school_name, role_id) VALUES (gen_user_id, $3, $4, $5, $6, $7, $8);
+    INSERT INTO user_details (user_id, title, first_name, last_name, email, zip, school_name, role_id) VALUES (gen_user_id, $3, $4, $5, $6, $7, $8, $9);
     INSERT INTO activation_tokens (user_id, token) VALUES (gen_user_id, activation_token);
     RETURN activation_token;
 END

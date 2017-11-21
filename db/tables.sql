@@ -25,6 +25,7 @@ CREATE TABLE librarians (
 CREATE TABLE teacher_details (
   id SERIAL PRIMARY KEY NOT NULL,
   user_id TEXT REFERENCES users (id),
+  title TEXT,
   first_name TEXT,
   last_name TEXT,
   email TEXT,
