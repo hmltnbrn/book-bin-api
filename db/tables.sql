@@ -1,3 +1,20 @@
+DROP TABLE IF EXISTS users
+, user_roles
+, teacher_details
+, librarian_details
+, books
+, teacher_books
+, classes
+, students
+, checked_out_books
+, activation_tokens
+, password_tokens;
+
+CREATE TABLE user_roles (
+  id SERIAL PRIMARY KEY NOT NULL,
+  name TEXT
+); /* Administrator, Teacher, Librarian */
+
 CREATE TABLE users (
   id TEXT PRIMARY KEY NOT NULL,
   username TEXT,
@@ -7,25 +24,40 @@ CREATE TABLE users (
   activated BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-CREATE TABLE user_roles (
-  id SERIAL PRIMARY KEY NOT NULL,
-  name TEXT
-); /* Teachers, Librarians */
-
-CREATE TABLE teachers (
-  id SERIAL PRIMARY KEY NOT NULL,
-  user_id TEXT REFERENCES users (id)
-);
-
-CREATE TABLE librarians (
-  id SERIAL PRIMARY KEY NOT NULL,
-  user_id TEXT REFERENCES users (id)
-);
-
 CREATE TABLE teacher_details (
-  id SERIAL PRIMARY KEY NOT NULL,
+  id TEXT PRIMARY KEY NOT NULL,
   user_id TEXT REFERENCES users (id),
   title TEXT,
+  first_name TEXT,
+  last_name TEXT,
+  email TEXT,
+  zip TEXT,
+  school_name TEXT
+);
+
+CREATE TABLE classes (
+  id SERIAL PRIMARY KEY NOT NULL,
+  teacher_id TEXT REFERENCES teacher_details (id),
+  name TEXT,
+  obsolete BOOLEAN
+);
+
+CREATE TABLE students (
+  id SERIAL PRIMARY KEY NOT NULL,
+  first_name TEXT,
+  last_name TEXT,
+  email TEXT,
+  reading_level TEXT,
+  class_id INTEGER REFERENCES classes (id),
+  active BOOLEAN,
+  obsolete BOOLEAN
+);
+
+CREATE TABLE librarian_details (
+  id TEXT PRIMARY KEY NOT NULL,
+  user_id TEXT REFERENCES users (id),
+  teacher_id TEXT REFERENCES teacher_details (id),
+  student_id INTEGER REFERENCES students (id),
   first_name TEXT,
   last_name TEXT,
   email TEXT,
@@ -38,43 +70,32 @@ CREATE TABLE books (
   title TEXT,
   author TEXT,
   genre TEXT,
-  reading_level TEXT
-);
-
-CREATE TABLE user_books (
-  id SERIAL PRIMARY KEY NOT NULL,
-  user_id TEXT REFERENCES users (id),
-  genre TEXT,
   reading_level TEXT,
   number_in INTEGER,
   number_out INTEGER,
   available BOOLEAN
 );
 
-CREATE TABLE classes (
+CREATE TABLE teacher_books (
   id SERIAL PRIMARY KEY NOT NULL,
-  user_id REFERENCES users (id),
-  name TEXT
-);
-
-CREATE TABLE students (
-  id SERIAL PRIMARY KEY NOT NULL,
-  first_name TEXT,
-  last_name TEXT,
-  email TEXT,
+  teacher_id TEXT REFERENCES teacher_details (id),
+  genre TEXT,
   reading_level TEXT,
-  class_id INTEGER REFERENCES classes (id),
-  active BOOLEAN
+  number_in INTEGER,
+  number_out INTEGER,
+  available BOOLEAN,
+  obsolete BOOLEAN
 );
 
 CREATE TABLE checked_out_books (
   id SERIAL PRIMARY KEY NOT NULL,
-  user_id TEXT REFERENCES users (id),
+  teacher_id TEXT REFERENCES teacher_details (id),
   book_id INTEGER REFERENCES books (id),
   student_id INTEGER REFERENCES students (id),
   date_due BIGINT,
   date_out BIGINT,
-  date_in BIGINT
+  date_in BIGINT,
+  obsolete BOOLEAN
 );
 
 CREATE TABLE activation_tokens (
@@ -89,6 +110,11 @@ CREATE TABLE password_tokens (
   token TEXT,
   exp BIGINT
 );
+
+INSERT INTO user_roles (name) VALUES
+ ('Administrator')
+,('Teacher')
+,('Librarian');
 
 INSERT INTO students (name, class, active) VALUES
  ('Kevin Costner','601',TRUE)
@@ -113,14 +139,10 @@ INSERT INTO users (username, password, salt, valid) VALUES
  ('Teacher','0d69f9f9f5f8281916dfb28f83b7621437a1618ee881e745cfcfb844f7f0634e','f574566127fc27d61d4c4777ac09ac9ec513ee843eb5c21fee42887b7b0542b9',TRUE)
 ,('Librarian','02a3efdafbb99e165f647a734dc67e64764cded725225897c1ab23aa0a0f6c35','a47da52d82102a4d5db9a38cd834cc7705f63dea40d971e48378915b5a5a4fe8',TRUE);
 
-INSERT INTO user_roles (name) VALUES
- ('Teacher')
-,('Student');
+INSERT INTO user_details (teacher_id, user_id, first_name, last_name, email, zip, school_name) VALUES
+ ('1', '1', 'Brian', 'Hamilton', 'hmltnbrn@gmail.com', '11105', 'Wagner Middle School');
 
-INSERT INTO user_details (user_id, first_name, last_name, email, zip, school_name, role_id) VALUES
- ('1', 'Brian', 'Hamilton', 'hmltnbrn@gmail.com', '11105', 'Wagner Middle School', 1);
-
-INSERT INTO books (title, author, genre, level, number_in, number_out, available) VALUES
+INSERT INTO books (title, author, genre, reading_level, number_in, number_out, available) VALUES
  ('1984','George Orwell','Classics','Z',1,0,'TRUE')
 ,('145th Street: Short Stories','Walter Dean Myers','Realistic Fiction','Z',1,0,'TRUE')
 ,('A Break with Charity: A Story About the Salem Witch Trials','Ann Rinaldi','Historical Fiction','X',1,0,'TRUE')

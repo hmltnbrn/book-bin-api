@@ -2,19 +2,21 @@ CREATE OR REPLACE FUNCTION cl_sign_up(u_input TEXT, p_input TEXT, t_input TEXT, 
 RETURNS TEXT AS $$
 DECLARE
     gen_user_id TEXT;
+    gen_teacher_id TEXT;
     gen_user_salt TEXT;
     hashed_pass TEXT;
     activation_token TEXT;
 BEGIN
-    IF EXISTS(SELECT u.username FROM users u, user_details d WHERE u.id = d.user_id AND (u.username = $1 OR d.email = $5)) THEN
+    IF EXISTS(SELECT u.username FROM users u, teacher_details d WHERE u.id = d.user_id AND (u.username = $1 OR d.email = $5)) THEN
         RETURN 'false';
     END IF;
     SELECT * INTO gen_user_id FROM encode(gen_random_bytes(16), 'hex');
+    SELECT * INTO gen_teacher_id FROM encode(gen_random_bytes(16), 'hex');
     SELECT * INTO gen_user_salt FROM gen_salt('bf');
     SELECT * INTO hashed_pass FROM encode(digest($2 || gen_user_salt, 'sha256'), 'hex');
     SELECT * INTO activation_token FROM encode(gen_random_bytes(16), 'hex');
-    INSERT INTO users (id, username, password, salt) VALUES (gen_user_id, $1, hashed_pass, gen_user_salt);
-    INSERT INTO user_details (user_id, title, first_name, last_name, email, zip, school_name, role_id) VALUES (gen_user_id, $3, $4, $5, $6, $7, $8, $9);
+    INSERT INTO users (id, username, password, salt, role_id) VALUES (gen_user_id, $1, hashed_pass, gen_user_salt, $9);
+    INSERT INTO teacher_details (id, user_id, title, first_name, last_name, email, zip, school_name) VALUES (gen_teacher_id, gen_user_id, $3, $4, $5, $6, $7, $8);
     INSERT INTO activation_tokens (user_id, token) VALUES (gen_user_id, activation_token);
     RETURN activation_token;
 END
@@ -39,7 +41,7 @@ DECLARE
     gen_token TEXT;
     gen_exp BIGINT;
 BEGIN
-    SELECT d.user_id INTO get_user_id FROM user_details d WHERE d.email = $1;
+    SELECT d.user_id INTO get_user_id FROM teacher_details d WHERE d.email = $1;
     IF get_user_id IS NULL THEN
       RETURN 'false';
     END IF;
@@ -59,7 +61,7 @@ DECLARE
     gen_user_salt TEXT;
     hashed_pass TEXT;
 BEGIN
-    SELECT t.user_id, t.exp INTO get_user_id, get_exp FROM user_details d, password_tokens t WHERE t.user_id = d.user_id AND d.email = $1 AND t.token = $2;
+    SELECT t.user_id, t.exp INTO get_user_id, get_exp FROM teacher_details d, password_tokens t WHERE t.user_id = d.user_id AND d.email = $1 AND t.token = $2;
     IF get_user_id IS NULL THEN
       RETURN FALSE;
     END IF;
@@ -84,5 +86,18 @@ BEGIN
     END IF;
     UPDATE users u SET activated = TRUE WHERE u.id = get_user_id;
     RETURN TRUE;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION cl_forgot_username(e_input TEXT)
+RETURNS TEXT AS $$
+DECLARE
+    get_username TEXT;
+BEGIN
+    SELECT u.username INTO get_username FROM users u, teacher_details d WHERE u.id = d.user_id AND d.email = $1;
+    IF get_username IS NULL THEN
+      RETURN 'false';
+    END IF;
+    RETURN get_username;
 END
 $$ LANGUAGE plpgsql;

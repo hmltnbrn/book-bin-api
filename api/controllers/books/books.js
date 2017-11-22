@@ -22,7 +22,7 @@ exports.GetAll = function (req, res, next) {
 
   let countSql = "SELECT COUNT(*) from books " + where;
 
-  let sql = "SELECT id, title, author, genre, level, number_in, number_out, available " +
+  let sql = "SELECT id, title, author, genre, reading_level, number_in, number_out, available " +
               "FROM books " + where +
               " ORDER BY title LIMIT $" + (values.length + 1) + " OFFSET $" + (values.length + 2);
 

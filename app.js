@@ -46,6 +46,9 @@ app.route('/auth/forgotpassword')
 app.route('/auth/resetpassword')
   .post(auth.resetPassword);
 
+app.route('/auth/forgotusername')
+  .post(auth.forgotUsername);
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
