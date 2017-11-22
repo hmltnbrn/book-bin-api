@@ -54,7 +54,7 @@ END
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION cl_reset_password(e_input TEXT, t_input TEXT, p_input TEXT)
-RETURNS BOOLEAN AS $$
+RETURNS TEXT AS $$
 DECLARE
     get_user_id TEXT;
     get_exp BIGINT;
@@ -63,15 +63,15 @@ DECLARE
 BEGIN
     SELECT t.user_id, t.exp INTO get_user_id, get_exp FROM teacher_details d, password_tokens t WHERE t.user_id = d.user_id AND d.email = $1 AND t.token = $2;
     IF get_user_id IS NULL THEN
-      RETURN FALSE;
+      RETURN 'email';
     END IF;
     IF get_exp < extract(epoch from now()) THEN
-      RETURN FALSE;
+      RETURN 'expired';
     END IF;
     SELECT * INTO gen_user_salt FROM gen_salt('bf');
     SELECT * INTO hashed_pass FROM encode(digest($3 || gen_user_salt, 'sha256'), 'hex');
     UPDATE users u SET password = hashed_pass, salt = gen_user_salt WHERE u.id = get_user_id;
-    RETURN TRUE;
+    RETURN 'true';
 END
 $$ LANGUAGE plpgsql;
 

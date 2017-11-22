@@ -67,8 +67,9 @@ exports.forgotPassword = function(req, res, next) {
 exports.resetPassword = function(req, res, next) {
   return db.query("SELECT * FROM cl_reset_password($1, $2, $3)", [req.body.email, req.body.token, req.body.password], true, req.body.email + " reset password attempt")
     .then(token => {
-      if(!token.cl_reset_password) return res.status(400).json({ status: false, message: "Token invalid or expired" });
-      return res.status(200).json({ status: true, message: "Token created" });
+      if(token.cl_reset_password == 'email') return res.status(400).json({ status: false, message: "Email or token invalid" });
+      else if(token.cl_reset_password == 'expired') return res.status(400).json({ status: false, message: "Token expired" });
+      return res.status(200).json({ status: true, message: "Password changed" });
     })
     .catch(err => {
       console.log(err);
@@ -84,7 +85,6 @@ exports.forgotUsername = function(req, res, next) {
         if(err) return res.status(500).json({ status: false, message: err.message });
         return res.status(200).json({ status: true, message: "Email sent" });
       });
-      return res.status(200).json({ status: true, message: "Email sent" });
     })
     .catch(err => {
       console.log(err);
