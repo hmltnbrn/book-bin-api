@@ -6,6 +6,8 @@ module.exports = function(app) {
   app.all('/api/*', auth.checkToken);
 
   app.route('/api/Books')
-    .get(books.GetAll);
+    .get(books.getAllBooks);
+  app.route('/api/Books/GetAllTeacherBooks')
+    .get(books.getAllTeacherBooks);
 
 }

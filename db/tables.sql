@@ -69,8 +69,9 @@ CREATE TABLE books (
   id SERIAL PRIMARY KEY NOT NULL,
   title TEXT,
   author TEXT,
-  genre TEXT,
+  genres TEXT [],
   reading_level TEXT,
+  description TEXT,
   number_in INTEGER,
   number_out INTEGER,
   available BOOLEAN
@@ -79,8 +80,9 @@ CREATE TABLE books (
 CREATE TABLE teacher_books (
   id SERIAL PRIMARY KEY NOT NULL,
   teacher_id TEXT REFERENCES teacher_details (id),
-  genre TEXT,
+  genres TEXT [],
   reading_level TEXT,
+  description TEXT,
   number_in INTEGER,
   number_out INTEGER,
   available BOOLEAN,

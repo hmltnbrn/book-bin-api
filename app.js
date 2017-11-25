@@ -31,22 +31,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 
-app.route('/auth/signup')
+app.route('/auth/SignUp')
   .post(auth.signUp);
 
-app.route('/auth/signin')
+app.route('/auth/SignIn')
   .post(auth.signIn);
 
-app.route('/auth/activate')
+app.route('/auth/Activate')
   .post(auth.activateAccount);
 
-app.route('/auth/forgotpassword')
+app.route('/auth/ForgotPassword')
   .post(auth.forgotPassword);
 
-app.route('/auth/resetpassword')
+app.route('/auth/ResetPassword')
   .post(auth.resetPassword);
 
-app.route('/auth/forgotusername')
+app.route('/auth/ForgotUsername')
   .post(auth.forgotUsername);
 
 // catch 404 and forward to error handler
