@@ -23,14 +23,14 @@ END
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION cl_sign_in(u_input TEXT, p_input TEXT)
-RETURNS TABLE(id TEXT, username TEXT) AS $$
+RETURNS TABLE(user_id TEXT, teacher_id TEXT, username TEXT, role_id INTEGER) AS $$
 DECLARE
     user_salt TEXT;
     hashed_pass TEXT;
 BEGIN
     SELECT u.salt INTO user_salt FROM users u WHERE u.username = $1 AND u.activated = TRUE;
     SELECT * INTO hashed_pass FROM encode(digest($2 || user_salt, 'sha256'), 'hex');
-    RETURN QUERY SELECT u.id, u.username FROM users u WHERE u.username = $1 AND u.password = hashed_pass;
+    RETURN QUERY SELECT u.id AS user_id, t.id AS teacher_id, u.username, u.role_id AS role_id FROM users u, teacher_details t WHERE u.id = t.user_id AND u.username = $1 AND u.password = hashed_pass;
 END
 $$ LANGUAGE plpgsql;
 

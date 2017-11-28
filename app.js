@@ -14,10 +14,6 @@ require('dotenv-safe').load({
   allowEmptyValues: true
 });
 
-var index = require('./routes/index');
-var auth = require('./auth');
-var api = require('./api')(app);
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -28,6 +24,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+var index = require('./routes/index');
+var auth = require('./auth');
+var api = require('./api')(app);
 
 app.use('/', index);
 

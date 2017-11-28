@@ -38,7 +38,7 @@ exports.signIn = function(req, res, next) {
       const payload = {
         exp: moment().add(14, 'days').unix(),
         iat: moment().unix(),
-        sub: user.id
+        sub: user
       };
       let token = jwt.sign(payload, process.env.JWT_TOKEN_SECRET);
       return res.status(200).json({ status: true, id: user.id, token: token });

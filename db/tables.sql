@@ -39,7 +39,7 @@ CREATE TABLE classes (
   id SERIAL PRIMARY KEY NOT NULL,
   teacher_id TEXT REFERENCES teacher_details (id),
   name TEXT,
-  obsolete BOOLEAN
+  obsolete BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE students (
@@ -50,7 +50,7 @@ CREATE TABLE students (
   reading_level TEXT,
   class_id INTEGER REFERENCES classes (id),
   active BOOLEAN,
-  obsolete BOOLEAN
+  obsolete BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE librarian_details (
@@ -70,23 +70,23 @@ CREATE TABLE books (
   title TEXT,
   author TEXT,
   genres TEXT [],
-  reading_level TEXT,
   description TEXT,
-  number_in INTEGER,
-  number_out INTEGER,
-  available BOOLEAN
+  reading_level TEXT
 );
 
 CREATE TABLE teacher_books (
   id SERIAL PRIMARY KEY NOT NULL,
   teacher_id TEXT REFERENCES teacher_details (id),
+  book_id INTEGER REFERENCES books (id),
+  title TEXT,
+  author TEXT,
   genres TEXT [],
-  reading_level TEXT,
   description TEXT,
+  reading_level TEXT,
   number_in INTEGER,
   number_out INTEGER,
   available BOOLEAN,
-  obsolete BOOLEAN
+  obsolete BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE checked_out_books (
@@ -97,7 +97,7 @@ CREATE TABLE checked_out_books (
   date_due BIGINT,
   date_out BIGINT,
   date_in BIGINT,
-  obsolete BOOLEAN
+  obsolete BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE activation_tokens (
@@ -118,31 +118,77 @@ INSERT INTO user_roles (name) VALUES
 ,('Teacher')
 ,('Librarian');
 
-INSERT INTO students (name, class, active) VALUES
- ('Kevin Costner','601',TRUE)
-,('Brian Hamilton','601',TRUE)
-,('Barack Obama','601',TRUE)
-,('Alex Rodriguez','601',TRUE)
-,('Henry Tudor','601',TRUE)
-,('Peter Capaldi','602',TRUE)
-,('Idris Elba','602',TRUE)
-,('Benjamin Sisko','602',TRUE)
-,('Jon Snow','602',TRUE)
-,('Elizabeth Thornberry','602',TRUE)
-,('Daniel Day-Lewis','603',TRUE)
-,('William Henry Harrison','603',TRUE)
-,('Natalie Merchant','603',TRUE)
-,('Lin-Manuel Miranda','603',TRUE)
-,('Daenerys Targaryen','603',TRUE)
-,('Josh Lyman','602',FALSE)
-,('Christian Slater','603',FALSE);
+INSERT INTO users (id, username, password, salt, role_id, activated) VALUES
+ ('317a22933f23e46593fbabe76ff82d1e','hmltnbrn','e970fab4c326d04961148e659985994c183f08a966bb8d725f35dc748699f795','$2a$06$qiGav.GHV1Z3rljxUZcxye',2,TRUE);
 
-INSERT INTO users (username, password, salt, valid) VALUES
- ('Teacher','0d69f9f9f5f8281916dfb28f83b7621437a1618ee881e745cfcfb844f7f0634e','f574566127fc27d61d4c4777ac09ac9ec513ee843eb5c21fee42887b7b0542b9',TRUE)
-,('Librarian','02a3efdafbb99e165f647a734dc67e64764cded725225897c1ab23aa0a0f6c35','a47da52d82102a4d5db9a38cd834cc7705f63dea40d971e48378915b5a5a4fe8',TRUE);
+INSERT INTO teacher_details (id, user_id, title, first_name, last_name, email, zip, school_name) VALUES
+ ('9a237f7c6bbd539586f27b43d87183e5','317a22933f23e46593fbabe76ff82d1e','Mr.','Brian','Hamilton','hmltnbrn@gmail.com','11105','Wagner Middle School');
 
-INSERT INTO user_details (teacher_id, user_id, first_name, last_name, email, zip, school_name) VALUES
- ('1', '1', 'Brian', 'Hamilton', 'hmltnbrn@gmail.com', '11105', 'Wagner Middle School');
+INSERT INTO books (title, author, genres, description, reading_level) VALUES
+ ('1984','George Orwell','{"Classics"}','Description of book goes here','Z')
+,('145th Street: Short Stories','Walter Dean Myers','{"Realistic Fiction"}','Description of book goes here','Z')
+,('A Break with Charity: A Story About the Salem Witch Trials','Ann Rinaldi','{"Historical Fiction"}','Description of book goes here','X')
+,('A Cool Moonlight','Angela Johnson','{"Realistic Fiction"}','Description of book goes here','X')
+,('A Corner of the Universe','Ann M. Martin','{"Realistic Fiction"}','Description of book goes here','Y')
+,('A James Bond Adventure: Hurricane Gold','Charlie Higson','{"Adventure"}','Description of book goes here','W')
+,('A Jigsaw Jones Mystery: The Case of the Christmas Snowman (Book 2)','James Preller','{"Mystery"}','Description of book goes here','N')
+,('A Jigsaw Jones Mystery: The Case of the Secret Valentine (Book 3)','James Preller','{"Mystery"}','Description of book goes here','N')
+,('A Jigsaw Jones Mystery: The Case of the Spooky Sleepover (Book 4)','James Preller','{"Mystery"}','Description of book goes here','N')
+,('A Jigsaw Jones Mystery: The Case of the Stolen Baseball Cards (Book 5)','James Preller','{"Mystery"}','Description of book goes here','N')
+,('A Little Princess','Frances Hodgson Burnett','{"Classics"}','Description of book goes here','O')
+,('A Long Walk to Water','Linda Sue Park','{"Realistic Fiction"}','Description of book goes here','RST')
+,('Bluford High: A Matter of Trust','Anne Schraff','{"Realistic Fiction"}','Description of book goes here','Z')
+,('A Series of Unfortunate Events: The Austere Academy (Book 5)','Lemony Snicket','{"Adventure"}','Description of book goes here','V')
+,('A Series of Unfortunate Events: The Bad Beginning (Book 1)','Lemony Snicket','{"Adventure","Mystery"}','Description of book goes here','V')
+,('A Series of Unfortunate Events: The Carniverous Carnival (Book 9)','Lemony Snicket','{"Adventure"}','Description of book goes here','V')
+,('A Series of Unfortunate Events: The End (Book 13)','Lemony Snicket','{"Adventure"}','Description of book goes here','V')
+,('A Series of Unfortunate Events: The Ersatz Elevator (Book 6)','Lemony Snicket','{"Adventure"}','Description of book goes here','V')
+,('A Series of Unfortunate Events: The Grim Grotto (Book 11)','Lemony Snicket','{"Adventure"}','Description of book goes here','V')
+,('A Series of Unfortunate Events: The Miserable Mill (Book 4)','Lemony Snicket','{"Adventure"}','Description of book goes here','V')
+,('A Series of Unfortunate Events: The Penultimate Peril (Book 12)','Lemony Snicket','{"Adventure"}','Description of book goes here','V')
+,('A Series of Unfortunate Events: The Reptile Room (Book 2)','Lemony Snicket','{"Adventure"}','Description of book goes here','V')
+,('A Series of Unfortunate Events: The Slippery Slope (Book 10)','Lemony Snicket','{"Adventure"}','Description of book goes here','V')
+,('A Series of Unfortunate Events: The Vile Village (Book 7)','Lemony Snicket','{"Adventure"}','Description of book goes here','V')
+,('A Series of Unfortunate Events: The Wide Window (Book 3)','Lemony Snicket','{"Adventure"}','Description of book goes here','V')
+,('A Series of Unfortunate Events: The Hostile Hospital (Book 8)','Lemony Snicket','{"Adventure"}','Description of book goes here','V');
+
+INSERT INTO teacher_books (teacher_id, book_id, title, author, genres, description, reading_level, number_in, number_out, available) VALUES
+ ('9a237f7c6bbd539586f27b43d87183e5',1,'','','{}','','',1,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',2,'','','{}','','',1,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',3,'','','{}','','',1,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',4,'','','{}','','',2,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',5,'','','{}','','',1,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',6,'','','{}','','',2,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',7,'','','{}','','',1,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',8,'','','{}','','',1,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',9,'','','{}','','',1,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',10,'','','{}','','',1,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',11,'','','{}','','',1,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',12,'','','{}','','',6,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',13,'','','{}','','',1,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',14,'','','{}','','',5,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',15,'','','{}','','',3,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',16,'','','{}','','',2,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',17,'','','{}','','',3,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',18,'','','{}','','',5,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',19,'','','{}','','',2,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',20,'','','{}','','',4,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',21,'','','{}','','',3,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',22,'','','{}','','',2,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',23,'','','{}','','',2,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',24,'','','{}','','',3,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',25,'','','{}','','',5,0,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',26,'','','{}','','',2,0,'TRUE');
+
+INSERT INTO classes (teacher_id, name) VALUES
+ ('9a237f7c6bbd539586f27b43d87183e5', '614')
+,('9a237f7c6bbd539586f27b43d87183e5', '615');
+
+INSERT INTO students (first_name, last_name, email, reading_level, class_id, active) VALUES
+ ('Brian','Schmamilton','brian.schmamilton@school.com','Z',1,TRUE)
+,('Kevin','Costner','kevin.costner@school.com','H',1,TRUE)
+,('Barack','Obama','barack.obama@school.com','Y',2,TRUE)
+,('Olivia','Wilde','olivia.wilde@school.com','W',1,TRUE);
 
 INSERT INTO books (title, author, genre, reading_level, number_in, number_out, available) VALUES
  ('1984','George Orwell','Classics','Z',1,0,'TRUE')
