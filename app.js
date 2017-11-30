@@ -27,27 +27,31 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 var index = require('./routes/index');
 var auth = require('./auth');
-var api = require('./api')(app);
+var api = require('./api');
 
 app.use('/', index);
 
-app.route('/auth/SignUp')
-  .post(auth.signUp);
+app.use('/api', api);
 
-app.route('/auth/SignIn')
-  .post(auth.signIn);
+app.use('/auth', auth);
 
-app.route('/auth/Activate')
-  .post(auth.activateAccount);
+// app.route('/auth/SignUp')
+//   .post(auth.signUp);
 
-app.route('/auth/ForgotPassword')
-  .post(auth.forgotPassword);
+// app.route('/auth/SignIn')
+//   .post(auth.signIn);
 
-app.route('/auth/ResetPassword')
-  .post(auth.resetPassword);
+// app.route('/auth/Activate')
+//   .post(auth.activateAccount);
 
-app.route('/auth/ForgotUsername')
-  .post(auth.forgotUsername);
+// app.route('/auth/ForgotPassword')
+//   .post(auth.forgotPassword);
+
+// app.route('/auth/ResetPassword')
+//   .post(auth.resetPassword);
+
+// app.route('/auth/ForgotUsername')
+//   .post(auth.forgotUsername);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

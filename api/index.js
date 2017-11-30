@@ -1,19 +1,12 @@
-let books = require('./controllers/books/books'),
-    students = require('./controllers/students/students'),
-    auth = require('../auth');
+let express = require('express'),
+    books = require('./controllers/books'),
+    students = require('./controllers/students'),
+    auth = require('../auth/token'),
+    router = express.Router();
 
-module.exports = function(app) {
+router.all('/*', auth.checkToken);
 
-  app.all('/api/*', auth.checkToken);
+router.use('/Books', books);
+router.use('/Students', students);
 
-  app.route('/api/Books')
-    .get(books.getAllBooks);
-  app.route('/api/Books/GetAllTeacherBooks')
-    .get(books.getAllTeacherBooks);
-  app.route('/api/Books/CheckOutBook')
-    .post(books.postCheckOutBook);
-
-  app.route('/api/Students/GetAllActiveStudents')
-    .get(students.getAllActiveStudents);
-
-}
+module.exports = router;
