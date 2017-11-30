@@ -1,9 +1,9 @@
 let express = require('express'),
-    router = express.Router();,
     db = require('../db'),
     email = require('../email'),
     jwt = require('jsonwebtoken'),
-    moment = require('moment');
+    moment = require('moment'),
+    router = express.Router();
 
 router.post('/SignUp', function(req, res, next) {
   return db.query("SELECT * FROM cl_sign_up($1, $2, $3, $4, $5, $6, $7, $8, $9)", [req.body.username, req.body.password, req.body.title, req.body.firstName, req.body.lastName, req.body.email, req.body.zip, req.body.schoolName, req.body.role], true, req.body.username + " sign up attempt")

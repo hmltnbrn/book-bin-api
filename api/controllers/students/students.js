@@ -4,7 +4,7 @@ let escape = s => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
 exports.getAllActiveStudents = function (req, res, next) {
 
-  let sql = 'SELECT s.* FROM students s, classes c WHERE s.class_id = c.id AND s.active IS TRUE AND c.teacher_id = $1';
+  let sql = 'SELECT s.* FROM students s, classes c WHERE s.class_id = c.id AND s.active IS TRUE AND c.teacher_id = $1 ORDER BY s.last_name';
 
   return db.query(sql, [req.user.teacher_id])
     .then(students => {

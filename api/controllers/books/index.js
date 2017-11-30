@@ -12,4 +12,10 @@ router.get('/TeacherBooks', books.getAllTeacherBooks);
 // api/Books/CheckOut
 router.post('/CheckOut', books.postCheckOutBook);
 
+// api/Books/CheckIn
+router.post('/CheckIn', books.postCheckInBook);
+
+// api/Books/Students
+router.get('/Students', books.getStudentsWithBook);
+
 module.exports = router;
