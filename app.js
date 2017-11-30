@@ -35,24 +35,6 @@ app.use('/api', api);
 
 app.use('/auth', auth);
 
-// app.route('/auth/SignUp')
-//   .post(auth.signUp);
-
-// app.route('/auth/SignIn')
-//   .post(auth.signIn);
-
-// app.route('/auth/Activate')
-//   .post(auth.activateAccount);
-
-// app.route('/auth/ForgotPassword')
-//   .post(auth.forgotPassword);
-
-// app.route('/auth/ResetPassword')
-//   .post(auth.resetPassword);
-
-// app.route('/auth/ForgotUsername')
-//   .post(auth.forgotUsername);
-
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
