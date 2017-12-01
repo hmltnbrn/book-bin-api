@@ -12,105 +12,105 @@ DROP TABLE IF EXISTS users
 
 CREATE TABLE user_roles (
   id SERIAL PRIMARY KEY NOT NULL,
-  name TEXT
+  name TEXT NOT NULL
 ); /* Administrator, Teacher, Librarian */
 
 CREATE TABLE users (
   id TEXT PRIMARY KEY NOT NULL,
-  username TEXT,
-  password TEXT,
-  salt TEXT,
+  username TEXT NOT NULL,
+  password TEXT NOT NULL,
+  salt TEXT NOT NULL,
   role_id INTEGER REFERENCES user_roles (id),
   activated BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE teacher_details (
   id TEXT PRIMARY KEY NOT NULL,
-  user_id TEXT REFERENCES users (id),
-  title TEXT,
-  first_name TEXT,
-  last_name TEXT,
-  email TEXT,
-  zip TEXT,
-  school_name TEXT
+  user_id TEXT NOT NULL REFERENCES users (id),
+  title TEXT NOT NULL,
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  zip TEXT NOT NULL,
+  school_name TEXT NOT NULL
 );
 
 CREATE TABLE classes (
   id SERIAL PRIMARY KEY NOT NULL,
-  teacher_id TEXT REFERENCES teacher_details (id),
-  name TEXT,
+  teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
+  name TEXT NOT NULL,
   obsolete BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE students (
   id SERIAL PRIMARY KEY NOT NULL,
-  first_name TEXT,
-  last_name TEXT,
-  email TEXT,
-  reading_level TEXT,
-  class_id INTEGER REFERENCES classes (id),
-  active BOOLEAN,
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  reading_level TEXT NOT NULL,
+  class_id INTEGER NOT NULL REFERENCES classes (id),
+  active BOOLEAN NOT NULL,
   obsolete BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE librarian_details (
   id TEXT PRIMARY KEY NOT NULL,
-  user_id TEXT REFERENCES users (id),
-  teacher_id TEXT REFERENCES teacher_details (id),
-  student_id INTEGER REFERENCES students (id),
-  first_name TEXT,
-  last_name TEXT,
-  email TEXT,
-  zip TEXT,
-  school_name TEXT
+  user_id TEXT NOT NULL REFERENCES users (id),
+  teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
+  student_id INTEGER NOT NULL REFERENCES students (id),
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  zip TEXT NOT NULL,
+  school_name TEXT NOT NULL
 );
 
 CREATE TABLE books (
   id SERIAL PRIMARY KEY NOT NULL,
-  title TEXT,
-  author TEXT,
-  genres TEXT [],
+  title TEXT NOT NULL,
+  author TEXT NOT NULL,
+  genres TEXT [] NOT NULL,
   description TEXT,
-  reading_level TEXT
+  reading_level TEXT NOT NULL
 );
 
 CREATE TABLE teacher_books (
   id SERIAL PRIMARY KEY NOT NULL,
-  teacher_id TEXT REFERENCES teacher_details (id),
-  book_id INTEGER REFERENCES books (id),
+  teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
+  book_id INTEGER NOT NULL REFERENCES books (id),
   title TEXT,
   author TEXT,
   genres TEXT [],
   description TEXT,
   reading_level TEXT,
-  number_in INTEGER,
-  number_out INTEGER,
-  available BOOLEAN,
+  number_in INTEGER NOT NULL,
+  number_out INTEGER NOT NULL DEFAULT 0,
+  available BOOLEAN NOT NULL DEFAULT TRUE,
   obsolete BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE checked_out_books (
   id SERIAL PRIMARY KEY NOT NULL,
-  teacher_id TEXT REFERENCES teacher_details (id),
-  book_id INTEGER REFERENCES books (id),
-  student_id INTEGER REFERENCES students (id),
+  teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
+  book_id INTEGER NOT NULL REFERENCES books (id),
+  student_id INTEGER NOT NULL REFERENCES students (id),
   date_due BIGINT,
-  date_out BIGINT,
+  date_out BIGINT NOT NULL,
   date_in BIGINT,
   obsolete BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE activation_tokens (
   id SERIAL PRIMARY KEY NOT NULL,
-  user_id TEXT,
-  token TEXT
+  user_id TEXT NOT NULL,
+  token TEXT NOT NULL
 );
 
 CREATE TABLE password_tokens (
   id SERIAL PRIMARY KEY NOT NULL,
-  user_id TEXT,
-  token TEXT,
-  exp BIGINT
+  user_id TEXT NOT NULL,
+  token TEXT NOT NULL,
+  exp BIGINT NOT NULL
 );
 
 INSERT INTO user_roles (name) VALUES
@@ -152,33 +152,33 @@ INSERT INTO books (title, author, genres, description, reading_level) VALUES
 ,('A Series of Unfortunate Events: The Wide Window (Book 3)','Lemony Snicket','{"Adventure"}','Description of book goes here','V')
 ,('A Series of Unfortunate Events: The Hostile Hospital (Book 8)','Lemony Snicket','{"Adventure"}','Description of book goes here','V');
 
-INSERT INTO teacher_books (teacher_id, book_id, title, author, genres, description, reading_level, number_in, number_out, available) VALUES
- ('9a237f7c6bbd539586f27b43d87183e5',1,'','','{}','','',1,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',2,'','','{}','','',1,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',3,'','','{}','','',1,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',4,'','','{}','','',2,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',5,'','','{}','','',1,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',6,'','','{}','','',2,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',7,'','','{}','','',1,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',8,'','','{}','','',1,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',9,'','','{}','','',1,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',10,'','','{}','','',1,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',11,'','','{}','','',1,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',12,'','','{}','','',6,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',13,'','','{}','','',1,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',14,'','','{}','','',5,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',15,'','','{}','','',3,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',16,'','','{}','','',2,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',17,'','','{}','','',3,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',18,'','','{}','','',5,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',19,'','','{}','','',2,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',20,'','','{}','','',4,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',21,'','','{}','','',3,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',22,'','','{}','','',2,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',23,'','','{}','','',2,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',24,'','','{}','','',3,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',25,'','','{}','','',5,0,'TRUE')
-,('9a237f7c6bbd539586f27b43d87183e5',26,'','','{}','','',2,0,'TRUE');
+INSERT INTO teacher_books (teacher_id, book_id, title, author, genres, description, reading_level, number_in, available) VALUES
+ ('9a237f7c6bbd539586f27b43d87183e5',1,'','','{}','','',1,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',2,'','','{}','','',1,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',3,'','','{}','','',1,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',4,'','','{}','','',2,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',5,'','','{}','','',1,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',6,'','','{}','','',2,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',7,'','','{}','','',1,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',8,'','','{}','','',1,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',9,'','','{}','','',1,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',10,'','','{}','','',1,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',11,'','','{}','','',1,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',12,'','','{}','','',6,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',13,'','','{}','','',1,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',14,'','','{}','','',5,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',15,'','','{}','','',3,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',16,'','','{}','','',2,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',17,'','','{}','','',3,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',18,'','','{}','','',5,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',19,'','','{}','','',2,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',20,'','','{}','','',4,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',21,'','','{}','','',3,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',22,'','','{}','','',2,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',23,'','','{}','','',2,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',24,'','','{}','','',3,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',25,'','','{}','','',5,'TRUE')
+,('9a237f7c6bbd539586f27b43d87183e5',26,'','','{}','','',2,'TRUE');
 
 INSERT INTO classes (teacher_id, name) VALUES
  ('9a237f7c6bbd539586f27b43d87183e5', '614')

@@ -106,7 +106,6 @@ exports.getStudentsWithBook = function (req, res, next) {
 }
 
 exports.postCheckOutBook = function (req, res, next) {
-  if(!req.body.book_id || !req.body.student_id) return res.status(400).json({ status: false, message: "Invalid student. Please try again." });
   return db.query("SELECT * FROM cl_check_out($1, $2, $3)", [req.user.teacher_id, req.body.book_id, req.body.student_id], true)
     .then(book => {
       if(!book.cl_check_out) return res.status(400).json({ status: false, message: "Student already has book" });
