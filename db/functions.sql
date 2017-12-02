@@ -102,7 +102,7 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION cl_check_out(t_input TEXT, b_input INTEGER, s_input INTEGER)
+CREATE OR REPLACE FUNCTION cl_check_out(t_input TEXT, b_input INTEGER, s_input INTEGER, d_input BIGINT)
 RETURNS BOOLEAN AS $$
 DECLARE
     gen_date BIGINT;
@@ -112,7 +112,7 @@ BEGIN
     END IF;
     SELECT * INTO gen_date FROM extract(epoch from now());
     gen_date := gen_date + 60 * 60 * 24;
-    INSERT INTO checked_out_books (teacher_id, book_id, student_id, date_out) VALUES ($1, $2, $3, gen_date);
+    INSERT INTO checked_out_books (teacher_id, book_id, student_id, date_due, date_out) VALUES ($1, $2, $3, $4, gen_date);
     UPDATE teacher_books SET number_in = number_in - 1, number_out = number_out + 1 WHERE teacher_id = $1 AND book_id = $2;
     RETURN TRUE;
 END
