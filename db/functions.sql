@@ -113,7 +113,7 @@ BEGIN
     SELECT * INTO gen_date FROM extract(epoch from now());
     gen_date := gen_date + 60 * 60 * 24;
     INSERT INTO checked_out_books (teacher_id, book_id, student_id, date_due, date_out) VALUES ($1, $2, $3, $4, gen_date);
-    UPDATE teacher_books SET number_in = number_in - 1, number_out = number_out + 1 WHERE teacher_id = $1 AND book_id = $2;
+    UPDATE teacher_books SET number_in = number_in - 1, number_out = number_out + 1 WHERE teacher_id = $1 AND id = $2;
     RETURN TRUE;
 END
 $$ LANGUAGE plpgsql;
@@ -129,7 +129,7 @@ BEGIN
     SELECT * INTO gen_date FROM extract(epoch from now());
     gen_date := gen_date + 60 * 60 * 24;
     UPDATE checked_out_books SET date_in = gen_date WHERE teacher_id = $1 AND book_id = $2 AND student_id = $3 AND date_in IS NULL;
-    UPDATE teacher_books SET number_in = number_in + 1, number_out = number_out - 1 WHERE teacher_id = $1 AND book_id = $2;
+    UPDATE teacher_books SET number_in = number_in + 1, number_out = number_out - 1 WHERE teacher_id = $1 AND id = $2;
     RETURN TRUE;
 END
 $$ LANGUAGE plpgsql;

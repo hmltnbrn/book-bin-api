@@ -3,9 +3,6 @@ let express = require('express'),
 
 let books = require('./books');
 
-// api/Books
-router.get('/', books.getAllBooks);
-
 // api/Books/TeacherBooks
 router.get('/TeacherBooks', books.getAllTeacherBooks);
 
@@ -17,5 +14,9 @@ router.post('/CheckIn', books.postCheckInBook);
 
 // api/Books/Students
 router.get('/Students', books.getStudentsWithBook);
+
+// api/Books
+router.get('/', books.getAllBooks);
+router.get('/:id', books.getBook);
 
 module.exports = router;
