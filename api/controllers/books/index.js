@@ -5,6 +5,8 @@ let books = require('./books');
 
 // api/Books/TeacherBooks
 router.get('/TeacherBooks', books.getAllTeacherBooks);
+router.post('/TeacherBooks', books.postTeacherBook);
+router.get('/TeacherBooks/:id', books.getTeacherBook);
 
 // api/Books/CheckOut
 router.post('/CheckOut', books.postCheckOutBook);
