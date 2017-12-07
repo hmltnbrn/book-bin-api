@@ -7,6 +7,7 @@ let books = require('./books');
 router.get('/TeacherBooks', books.getAllTeacherBooks);
 router.post('/TeacherBooks', books.postTeacherBook);
 router.get('/TeacherBooks/:id', books.getTeacherBook);
+router.delete('/TeacherBooks/:id', books.deleteTeacherBook);
 
 // api/Books/CheckOut
 router.post('/CheckOut', books.postCheckOutBook);

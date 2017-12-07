@@ -110,6 +110,10 @@ exports.postTeacherBook = function (req, res, next) {
     });
 }
 
+exports.deleteTeacherBook = function (req, res, next) {
+  return res.status(200).json({ status: true });
+}
+
 exports.getStudentsWithBook = function (req, res, next) {
   let sql = "SELECT s.id, s.first_name, s.last_name FROM students s, checked_out_books c " +
     "WHERE c.student_id = s.id AND c.date_in IS NULL AND teacher_id = $1 AND book_id = $2 ORDER BY s.last_name";
