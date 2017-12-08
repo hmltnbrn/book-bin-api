@@ -14,6 +14,7 @@ router.post('/CheckOut', books.postCheckOutBook);
 
 // api/Books/CheckIn
 router.post('/CheckIn', books.postCheckInBook);
+router.post('/CheckIn/Students', books.postStudentsCheckInBook, books.getTeacherBook);
 
 // api/Books/Students
 router.get('/Students', books.getStudentsWithBook);

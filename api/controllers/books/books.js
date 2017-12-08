@@ -68,21 +68,22 @@ exports.getBook = function (req, res, next) {
 
 exports.getTeacherBook = function (req, res, next) {
 
-  let bookResult,
+  let id = req.params.id || req.body.book_id,
+      bookResult,
       studentCurrent;
 
   let sql = "SELECT * FROM teacher_books WHERE id = $1 AND teacher_id = $2";
   let sql2 = "SELECT s.*, c.* FROM students s, checked_out_books c WHERE s.id = c.student_id AND c.date_in IS NULL AND c.book_id = $1 AND c.teacher_id = $2 ORDER BY c.date_out DESC";
   let sql3 = "SELECT s.*, c.* FROM students s, checked_out_books c WHERE s.id = c.student_id AND c.date_in IS NOT NULL AND c.book_id = $1 AND c.teacher_id = $2 ORDER BY c.date_in DESC";
 
-  return db.query(sql, [req.params.id, req.user.teacher_id], true)
+  return db.query(sql, [id, req.user.teacher_id], true)
     .then(book => {
       bookResult = book;
-      return db.query(sql2, [req.params.id, req.user.teacher_id])
+      return db.query(sql2, [id, req.user.teacher_id])
     })
     .then(students => {
       studentCurrent = students;
-      return db.query(sql3, [req.params.id, req.user.teacher_id])
+      return db.query(sql3, [id, req.user.teacher_id])
     })
     .then(students => {
       if(!bookResult) return res.status(404).json({ status: false, message: "Book doesn't exist" });
@@ -104,11 +105,11 @@ exports.postTeacherBook = function (req, res, next) {
   }
 
   let sql = "UPDATE teacher_books " + updateParts.slice(0, -2) + 
-    " WHERE id = $" + (fields.length + 1) + " AND teacher_id = $" + (fields.length + 2);
+    " WHERE id = $" + (fields.length + 1) + " AND teacher_id = $" + (fields.length + 2) + " RETURNING *";
 
-  return db.query(sql, values.concat([req.body.id, req.user.teacher_id]))
-    .then(() => {
-      return res.status(200).json({ status: true });
+  return db.query(sql, values.concat([req.body.id, req.user.teacher_id]), true)
+    .then(book => {
+      return res.status(200).send(book);
     })
     .catch(err => {
       console.log(err);
@@ -161,6 +162,19 @@ exports.postCheckInBook = function (req, res, next) {
     .then(book => {
       if(!book.cl_check_in) return res.status(400).json({ status: false, message: "Book already checked in. Please reload your library." });
       return res.status(200).json({ status: true, message: "Book checked in" });
+    })
+    .catch(err => {
+      console.log(err);
+      return res.status(500).json({ status: false, message: err.message });
+    });
+}
+
+exports.postStudentsCheckInBook = function (req, res, next) {
+  if(req.body.students.length == 0) return res.status(400).json({ status: false, message: "Invalid students. Please try again." });
+  return db.query("SELECT * FROM cl_check_in_students($1, $2, $3)", [req.user.teacher_id, req.body.book_id, req.body.students], true)
+    .then(book => {
+      if(!book.cl_check_in_students) return res.status(400).json({ status: false, message: "Books already checked in. Please reload your library." });
+      return next();
     })
     .catch(err => {
       console.log(err);
