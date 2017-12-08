@@ -118,7 +118,7 @@ INSERT INTO classes (teacher_id, name) VALUES
 ,('9a237f7c6bbd539586f27b43d87183e5', '615');
 
 INSERT INTO students (first_name, last_name, email, reading_level, class_id, active) VALUES
- ('Brian','Schmamilton','brian.schmamilton@school.com','Z',1,TRUE)
+ ('Brian','Roberts','brian.roberts@school.com','Z',1,TRUE)
 ,('Kevin','Costner','kevin.costner@school.com','H',1,TRUE)
 ,('Barack','Obama','barack.obama@school.com','Y',2,TRUE)
 ,('Olivia','Wilde','olivia.wilde@school.com','W',1,TRUE);
