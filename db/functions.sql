@@ -150,3 +150,14 @@ BEGIN
     RETURN TRUE;
 END
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION cl_delete_book(b_input INTEGER, t_input TEXT)
+RETURNS BOOLEAN AS $$
+BEGIN
+    IF EXISTS(SELECT * FROM checked_out_books WHERE book_id = $1 AND teacher_id = $2 AND date_in IS NULL) THEN
+        RETURN FALSE;
+    END IF;
+    UPDATE teacher_books SET obsolete = TRUE WHERE id = $1 AND teacher_id = $2;
+    RETURN TRUE;
+END
+$$ LANGUAGE plpgsql;

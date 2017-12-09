@@ -118,10 +118,9 @@ exports.postTeacherBook = function (req, res, next) {
 }
 
 exports.deleteTeacherBook = function (req, res, next) {
-  let sql = "UPDATE teacher_books SET obsolete = TRUE WHERE id = $1 AND teacher_id = $2";
-
-  return db.query(sql, [req.params.id, req.user.teacher_id])
-    .then(() => {
+  return db.query("SELECT * FROM cl_delete_book($1, $2)", [req.params.id, req.user.teacher_id], true)
+    .then(book => {
+      if(!book.cl_delete_book) return res.status(400).json({ status: false, message: "Book is currently checked out. Please check all copies back in before removing it from your library." });
       return res.status(200).json({ status: true });
     })
     .catch(err => {

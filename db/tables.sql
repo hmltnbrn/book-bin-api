@@ -72,8 +72,8 @@ CREATE TABLE teacher_books (
   genres TEXT [],
   description TEXT,
   reading_level TEXT,
-  number_in INTEGER NOT NULL,
-  number_out INTEGER NOT NULL DEFAULT 0,
+  number_in INTEGER NOT NULL CHECK (number_in >= 0),
+  number_out INTEGER NOT NULL DEFAULT 0 CHECK (number_out >= 0),
   available BOOLEAN NOT NULL DEFAULT TRUE,
   obsolete BOOLEAN NOT NULL DEFAULT FALSE
 );
