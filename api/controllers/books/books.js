@@ -1,4 +1,5 @@
-let db = require('../../../db');
+let db = require('../../../db'),
+    helper = require('../../helpers');
 
 let escape = s => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
@@ -69,6 +70,7 @@ exports.getBook = function (req, res, next) {
 exports.getTeacherBook = function (req, res, next) {
 
   let id = req.params.id || req.body.book_id,
+      response = {},
       bookResult,
       studentCurrent;
 
@@ -78,16 +80,19 @@ exports.getTeacherBook = function (req, res, next) {
 
   return db.query(sql, [id, req.user.teacher_id], true)
     .then(book => {
-      bookResult = book;
+      // bookResult = book;
+      response["book"] = book;
       return db.query(sql2, [id, req.user.teacher_id])
     })
     .then(students => {
-      studentCurrent = students;
+      // studentCurrent = students;
+      response["student_current"] = students;
       return db.query(sql3, [id, req.user.teacher_id])
     })
     .then(students => {
-      if(!bookResult) return res.status(404).json({ status: false, message: "Book doesn't exist" });
-      return res.status(200).json({ book: bookResult, studentCurrent: studentCurrent, studentHistory: students });
+      response["student_history"] = students;
+      if(!response["book"]) return res.status(404).json({ status: false, message: "Book doesn't exist" });
+      return res.status(200).json(response);
     })
     .catch(err => {
       console.log(err);
@@ -99,12 +104,7 @@ exports.postTeacherBook = function (req, res, next) {
   let fields = Object.keys(req.body),
       values = Object.keys(req.body).map((k) => req.body[k]);
 
-  let updateParts = "SET "
-  for(var i=0;i<fields.length;i++) {
-    updateParts += fields[i] + " = $" + (i + 1) + ", ";
-  }
-
-  let sql = "UPDATE teacher_books " + updateParts.slice(0, -2) + 
+  let sql = "UPDATE teacher_books " + helper.updateHelper(fields) + 
     " WHERE id = $" + (fields.length + 1) + " AND teacher_id = $" + (fields.length + 2) + " RETURNING *";
 
   return db.query(sql, values.concat([req.body.id, req.user.teacher_id]), true)
@@ -182,10 +182,23 @@ exports.postStudentsCheckInBook = function (req, res, next) {
 }
 
 exports.getBooksDashboard = function (req, res, next) {
-  let sql = "SELECT b.*, COUNT(b.id) AS check_out_total FROM checked_out_books c, teacher_books b WHERE c.book_id = b.id AND b.teacher_id = $1 GROUP BY b.id ORDER BY check_out_total DESC LIMIT 10"
-  return db.query(sql, [req.user.teacher_id])
+  let response = {};
+
+  let sql1 = "SELECT b.*, COUNT(b.id) AS check_out_total FROM checked_out_books c, teacher_books b WHERE c.book_id = b.id AND b.teacher_id = $1 GROUP BY b.id ORDER BY check_out_total DESC LIMIT 10";
+  let sql2 = "SELECT s.*, COUNT(s.id) AS books_read FROM checked_out_books c, teacher_books b, students s WHERE c.book_id = b.id AND c.student_id = s.id AND c.teacher_id = $1 AND c.date_in IS NOT NULL GROUP BY s.id ORDER BY books_read DESC LIMIT 10";
+
+  return db.query(sql1, [req.user.teacher_id])
     .then(books => {
-      return res.status(200).json({ top_books: books });
+      response["top_books"] = books;
+      return db.query(sql2, [req.user.teacher_id])
+    })
+    .then(students => {
+      response["top_readers"] = students;
+      return db.query("SELECT * FROM cl_overdue_books($1)", [req.user.teacher_id])
+    })
+    .then(books => {
+      response["overdue_books"] = books;
+      return res.status(200).json(response);
     })
     .catch(err => {
       console.log(err);
