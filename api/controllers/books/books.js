@@ -180,3 +180,15 @@ exports.postStudentsCheckInBook = function (req, res, next) {
       return res.status(500).json({ status: false, message: err.message });
     });
 }
+
+exports.getBooksDashboard = function (req, res, next) {
+  let sql = "SELECT b.*, COUNT(b.id) AS check_out_total FROM checked_out_books c, teacher_books b WHERE c.book_id = b.id AND b.teacher_id = $1 GROUP BY b.id ORDER BY check_out_total DESC LIMIT 10"
+  return db.query(sql, [req.user.teacher_id])
+    .then(books => {
+      return res.status(200).json({ top_books: books });
+    })
+    .catch(err => {
+      console.log(err);
+      return res.status(500).json({ status: false, message: err.message });
+    });
+}
