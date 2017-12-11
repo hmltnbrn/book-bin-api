@@ -184,8 +184,8 @@ exports.postStudentsCheckInBook = function (req, res, next) {
 exports.getBooksDashboard = function (req, res, next) {
   let response = {};
 
-  let sql1 = "SELECT b.*, COUNT(b.id) AS check_out_total FROM checked_out_books c, teacher_books b WHERE c.book_id = b.id AND b.teacher_id = $1 GROUP BY b.id ORDER BY check_out_total DESC LIMIT 10";
-  let sql2 = "SELECT s.*, COUNT(s.id) AS books_read FROM checked_out_books c, teacher_books b, students s WHERE c.book_id = b.id AND c.student_id = s.id AND c.teacher_id = $1 AND c.date_in IS NOT NULL GROUP BY s.id ORDER BY books_read DESC LIMIT 10";
+  let sql1 = "SELECT book_id, title, author, COUNT(book_id) AS check_out_total FROM student_books_view WHERE teacher_id = $1 GROUP BY book_id, title, author ORDER BY check_out_total DESC LIMIT 10";
+  let sql2 = "SELECT student_id, first_name, last_name, class_name, COUNT(book_id) AS books_read FROM student_books_view WHERE teacher_id = $1 AND date_in IS NOT NULL GROUP BY student_id, first_name, last_name, class_name ORDER BY books_read DESC LIMIT 10";
 
   return db.query(sql1, [req.user.teacher_id])
     .then(books => {
