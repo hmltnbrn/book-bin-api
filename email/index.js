@@ -15,16 +15,7 @@ let transporter = nodemailer.createTransport({
   }
 });
 
-let baseUrl = "";
-if (process.env.NODE_ENV == 'production') {
-  baseUrl = process.env.PROD_URL;
-}
-else if (process.env.NODE_ENV == 'staging') {
-  baseUrl = process.env.QA_URL;
-}
-else {
-  baseUrl = process.env.DEV_URL;
-}
+let baseUrl = process.env.BASE_URL;
 
 exports.activateAccount = function (username, email, token, cb) {
 
