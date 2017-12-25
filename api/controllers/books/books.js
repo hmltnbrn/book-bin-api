@@ -70,9 +70,7 @@ exports.getBook = function (req, res, next) {
 exports.getTeacherBook = function (req, res, next) {
 
   let id = req.params.id || req.body.book_id,
-      response = {},
-      bookResult,
-      studentCurrent;
+      response = {};
 
   let sql = "SELECT * FROM teacher_books WHERE id = $1 AND teacher_id = $2";
   let sql2 = "SELECT s.*, c.* FROM students s, checked_out_books c WHERE s.id = c.student_id AND c.date_in IS NULL AND c.book_id = $1 AND c.teacher_id = $2 ORDER BY c.date_out DESC";
@@ -80,12 +78,10 @@ exports.getTeacherBook = function (req, res, next) {
 
   return db.query(sql, [id, req.user.teacher_id], true)
     .then(book => {
-      // bookResult = book;
       response["book"] = book;
       return db.query(sql2, [id, req.user.teacher_id])
     })
     .then(students => {
-      // studentCurrent = students;
       response["student_current"] = students;
       return db.query(sql3, [id, req.user.teacher_id])
     })
@@ -102,7 +98,7 @@ exports.getTeacherBook = function (req, res, next) {
 
 exports.postTeacherBook = function (req, res, next) {
   let fields = Object.keys(req.body),
-      values = Object.keys(req.body).map((k) => req.body[k]);
+      values = fields.map((k) => req.body[k]);
 
   let sql = "UPDATE teacher_books " + helper.updateHelper(fields) + 
     " WHERE id = $" + (fields.length + 1) + " AND teacher_id = $" + (fields.length + 2) + " RETURNING *";

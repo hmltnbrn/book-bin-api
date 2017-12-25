@@ -163,11 +163,11 @@ END
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION cl_overdue_books(t_input TEXT)
-RETURNS TABLE(student_id INTEGER, first_name TEXT, last_name TEXT, book_id INTEGER, title TEXT, date_due BIGINT) AS $$
+RETURNS TABLE(student_id INTEGER, first_name TEXT, last_name TEXT, book_id INTEGER, title NETEXT, date_due BIGINT) AS $$
 DECLARE
     gen_date BIGINT;
 BEGIN
     SELECT * INTO gen_date FROM extract(epoch from now() at time zone 'utc');
-    RETURN QUERY SELECT c.student_id, s.first_name, s.last_name, c.book_id, b.title, c.date_due FROM teacher_books b, students s, checked_out_books c WHERE b.id = c.book_id AND s.id = c.student_id AND c.teacher_id = $1 AND c.date_due < gen_date AND c.date_due IS NOT NULL AND c.date_in IS NULL ORDER BY s.last_name;
+    RETURN QUERY SELECT c.student_id, s.first_name, s.last_name, c.book_id, b.title, c.date_due FROM teacher_books b, students s, checked_out_books c WHERE b.id = c.book_id AND s.id = c.student_id AND c.teacher_id = $1 AND c.date_due < gen_date AND c.date_due IS NOT NULL AND c.date_in IS NULL ORDER BY c.date_due DESC, s.last_name;
 END
 $$ LANGUAGE plpgsql;
