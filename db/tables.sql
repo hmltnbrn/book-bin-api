@@ -16,8 +16,8 @@ CREATE TABLE user_roles (
 
 CREATE TABLE users (
     id TEXT PRIMARY KEY NOT NULL,
-    username TEXT NOT NULL,
-    password TEXT NOT NULL,
+    username NETEXT NOT NULL,
+    password NETEXT NOT NULL,
     salt TEXT NOT NULL,
     role_id INTEGER REFERENCES user_roles (id),
     activated BOOLEAN NOT NULL DEFAULT FALSE
@@ -26,27 +26,27 @@ CREATE TABLE users (
 CREATE TABLE teacher_details (
     id TEXT PRIMARY KEY NOT NULL,
     user_id TEXT NOT NULL REFERENCES users (id),
-    title TEXT NOT NULL,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    zip TEXT NOT NULL,
-    school_name TEXT NOT NULL
+    title NETEXT NOT NULL,
+    first_name NETEXT NOT NULL,
+    last_name NETEXT NOT NULL,
+    email EMAIL NOT NULL,
+    zip ZIPCODE NOT NULL,
+    school_name NETEXT NOT NULL
 );
 
 CREATE TABLE classes (
     id SERIAL PRIMARY KEY NOT NULL,
     teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
-    name TEXT NOT NULL,
+    name NETEXT NOT NULL,
     obsolete BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE students (
     id SERIAL PRIMARY KEY NOT NULL,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    reading_level TEXT NOT NULL,
+    first_name NETEXT NOT NULL,
+    last_name NETEXT NOT NULL,
+    email EMAIL,
+    reading_level TEXT,
     class_id INTEGER NOT NULL REFERENCES classes (id),
     active BOOLEAN NOT NULL DEFAULT TRUE,
     obsolete BOOLEAN NOT NULL DEFAULT FALSE
@@ -57,11 +57,11 @@ CREATE TABLE librarian_details (
     user_id TEXT NOT NULL REFERENCES users (id),
     teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
     student_id INTEGER NOT NULL REFERENCES students (id),
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    zip TEXT NOT NULL,
-    school_name TEXT NOT NULL
+    first_name NETEXT NOT NULL,
+    last_name NETEXT NOT NULL,
+    email EMAIL NOT NULL,
+    zip ZIPCODE NOT NULL,
+    school_name NETEXT NOT NULL
 );
 
 CREATE TABLE teacher_books (
@@ -69,13 +69,15 @@ CREATE TABLE teacher_books (
     teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
     title NETEXT NOT NULL,
     author NETEXT NOT NULL,
-    genres TEXT [] NOT NULL,
+    genres TEXT [] NOT NULL CHECK (genres <> '{}'),
     description TEXT,
     reading_level TEXT,
-    number_in INTEGER NOT NULL CHECK (number_in >= 0),
-    number_out INTEGER NOT NULL DEFAULT 0 CHECK (number_out >= 0),
+    number_in INTEGER NOT NULL,
+    number_out INTEGER NOT NULL DEFAULT 0,
     available BOOLEAN NOT NULL DEFAULT TRUE,
-    obsolete BOOLEAN NOT NULL DEFAULT FALSE
+    obsolete BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT valid_numbers CHECK (number_in >= 0 AND number_out >= 0),
+    CONSTRAINT valid_total CHECK (number_in + number_out >= 1)
 );
 
 CREATE TABLE checked_out_books (
@@ -86,7 +88,8 @@ CREATE TABLE checked_out_books (
     date_due BIGINT,
     date_out BIGINT NOT NULL,
     date_in BIGINT,
-    obsolete BOOLEAN NOT NULL DEFAULT FALSE
+    obsolete BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT valid_date_due CHECK (date_due > date_out)
 );
 
 CREATE TABLE activation_tokens (

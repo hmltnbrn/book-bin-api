@@ -14,6 +14,7 @@ exports.getAllTeacherBooks = function (req, res, next) {
   let pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 12,
       page = req.query.page ? parseInt(req.query.page) : 1,
       search = req.query.search,
+      readingLevel = req.query.readingLevel,
       whereParts = [],
       values = [],
       totalItems = 0;
@@ -21,6 +22,11 @@ exports.getAllTeacherBooks = function (req, res, next) {
   if (search) {
     values.push(escape(search));
     whereParts.push("title || author ~* $" + values.length);
+  }
+
+  if (readingLevel) {
+    values.push(escape(readingLevel));
+    whereParts.push("reading_level ~* $" + values.length);
   }
 
   values.push(req.user.teacher_id);

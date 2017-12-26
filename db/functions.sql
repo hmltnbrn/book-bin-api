@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION cl_sign_up(u_input TEXT, p_input TEXT, t_input TEXT, fn_input TEXT, ln_input TEXT, e_input TEXT, z_input TEXT, sn_input TEXT, r_input INTEGER)
+CREATE OR REPLACE FUNCTION cl_sign_up(u_input TEXT, p_input PASSWORD, t_input TEXT, fn_input TEXT, ln_input TEXT, e_input TEXT, z_input TEXT, sn_input TEXT, r_input INTEGER)
 RETURNS TEXT AS $$
 DECLARE
     gen_user_id TEXT;
@@ -23,7 +23,7 @@ END
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION cl_sign_in(u_input TEXT, p_input TEXT)
-RETURNS TABLE(user_id TEXT, teacher_id TEXT, username TEXT, role_id INTEGER) AS $$
+RETURNS TABLE(user_id TEXT, teacher_id TEXT, username NETEXT, role_id INTEGER) AS $$
 DECLARE
     user_salt TEXT;
     hashed_pass TEXT;
@@ -53,7 +53,7 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION cl_reset_password(e_input TEXT, t_input TEXT, p_input TEXT)
+CREATE OR REPLACE FUNCTION cl_reset_password(e_input TEXT, t_input TEXT, p_input PASSWORD)
 RETURNS TEXT AS $$
 DECLARE
     get_user_id TEXT;
@@ -163,7 +163,7 @@ END
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION cl_overdue_books(t_input TEXT)
-RETURNS TABLE(student_id INTEGER, first_name TEXT, last_name TEXT, book_id INTEGER, title NETEXT, date_due BIGINT) AS $$
+RETURNS TABLE(student_id INTEGER, first_name NETEXT, last_name NETEXT, book_id INTEGER, title NETEXT, date_due BIGINT) AS $$
 DECLARE
     gen_date BIGINT;
 BEGIN

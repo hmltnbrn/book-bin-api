@@ -1,9 +1,9 @@
 -- DROP COMMANDS
 
-DROP FUNCTION IF EXISTS cl_sign_up(u_input text, p_input text, t_input text, fn_input text, ln_input text, e_input text, z_input text, sn_input text, r_input integer);
+DROP FUNCTION IF EXISTS cl_sign_up(u_input text, p_input password, t_input text, fn_input text, ln_input text, e_input text, z_input text, sn_input text, r_input integer);
 DROP FUNCTION IF EXISTS cl_sign_in(u_input text, p_input text);
 DROP FUNCTION IF EXISTS cl_password_token(e_input text);
-DROP FUNCTION IF EXISTS cl_reset_password(e_input text, t_input text, p_input text);
+DROP FUNCTION IF EXISTS cl_reset_password(e_input text, t_input text, p_input password);
 DROP FUNCTION IF EXISTS cl_activate_account(t_input text);
 DROP FUNCTION IF EXISTS cl_forgot_username(e_input text);
 DROP FUNCTION IF EXISTS cl_check_out(t_input text, b_input integer, s_input integer, d_input bigint);
@@ -26,11 +26,23 @@ DROP TABLE IF EXISTS users
 , password_tokens;
 
 DROP DOMAIN IF EXISTS NETEXT;
+DROP DOMAIN IF EXISTS PASSWORD;
+DROP DOMAIN IF EXISTS EMAIL;
+DROP DOMAIN IF EXISTS ZIPCODE;
 
 -- CREATE DOMAINS
 
 CREATE DOMAIN NETEXT AS TEXT
-    CONSTRAINT not_empty CHECK (LENGTH(VALUE) > 0);
+CONSTRAINT not_empty CHECK (LENGTH(VALUE) > 0);
+
+CREATE DOMAIN PASSWORD AS TEXT
+CONSTRAINT valid_password CHECK (VALUE ~ '^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()])[A-Za-z\d!@#$%^&*()]{8,}');
+
+CREATE DOMAIN EMAIL AS TEXT
+CONSTRAINT valid_email CHECK (VALUE ~ '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$');
+
+CREATE DOMAIN ZIPCODE AS TEXT
+CONSTRAINT valid_zip CHECK (VALUE ~ '^\d{5}$');
 
 -- CREATE TABLES
 
@@ -41,8 +53,8 @@ CREATE TABLE user_roles (
 
 CREATE TABLE users (
     id TEXT PRIMARY KEY NOT NULL,
-    username TEXT NOT NULL,
-    password TEXT NOT NULL,
+    username NETEXT NOT NULL,
+    password NETEXT NOT NULL,
     salt TEXT NOT NULL,
     role_id INTEGER REFERENCES user_roles (id),
     activated BOOLEAN NOT NULL DEFAULT FALSE
@@ -51,27 +63,27 @@ CREATE TABLE users (
 CREATE TABLE teacher_details (
     id TEXT PRIMARY KEY NOT NULL,
     user_id TEXT NOT NULL REFERENCES users (id),
-    title TEXT NOT NULL,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    zip TEXT NOT NULL,
-    school_name TEXT NOT NULL
+    title NETEXT NOT NULL,
+    first_name NETEXT NOT NULL,
+    last_name NETEXT NOT NULL,
+    email EMAIL NOT NULL,
+    zip ZIPCODE NOT NULL,
+    school_name NETEXT NOT NULL
 );
 
 CREATE TABLE classes (
     id SERIAL PRIMARY KEY NOT NULL,
     teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
-    name TEXT NOT NULL,
+    name NETEXT NOT NULL,
     obsolete BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE students (
     id SERIAL PRIMARY KEY NOT NULL,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    reading_level TEXT NOT NULL,
+    first_name NETEXT NOT NULL,
+    last_name NETEXT NOT NULL,
+    email EMAIL,
+    reading_level TEXT,
     class_id INTEGER NOT NULL REFERENCES classes (id),
     active BOOLEAN NOT NULL DEFAULT TRUE,
     obsolete BOOLEAN NOT NULL DEFAULT FALSE
@@ -82,11 +94,11 @@ CREATE TABLE librarian_details (
     user_id TEXT NOT NULL REFERENCES users (id),
     teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
     student_id INTEGER NOT NULL REFERENCES students (id),
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    zip TEXT NOT NULL,
-    school_name TEXT NOT NULL
+    first_name NETEXT NOT NULL,
+    last_name NETEXT NOT NULL,
+    email EMAIL NOT NULL,
+    zip ZIPCODE NOT NULL,
+    school_name NETEXT NOT NULL
 );
 
 CREATE TABLE teacher_books (
@@ -94,13 +106,15 @@ CREATE TABLE teacher_books (
     teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
     title NETEXT NOT NULL,
     author NETEXT NOT NULL,
-    genres TEXT [] NOT NULL,
+    genres TEXT [] NOT NULL CHECK (genres <> '{}'),
     description TEXT,
     reading_level TEXT,
-    number_in INTEGER NOT NULL CHECK (number_in >= 0),
-    number_out INTEGER NOT NULL DEFAULT 0 CHECK (number_out >= 0),
+    number_in INTEGER NOT NULL,
+    number_out INTEGER NOT NULL DEFAULT 0,
     available BOOLEAN NOT NULL DEFAULT TRUE,
-    obsolete BOOLEAN NOT NULL DEFAULT FALSE
+    obsolete BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT valid_numbers CHECK (number_in >= 0 AND number_out >= 0),
+    CONSTRAINT valid_total CHECK (number_in + number_out >= 1)
 );
 
 CREATE TABLE checked_out_books (
@@ -111,7 +125,8 @@ CREATE TABLE checked_out_books (
     date_due BIGINT,
     date_out BIGINT NOT NULL,
     date_in BIGINT,
-    obsolete BOOLEAN NOT NULL DEFAULT FALSE
+    obsolete BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT valid_date_due CHECK (date_due > date_out)
 );
 
 CREATE TABLE activation_tokens (
@@ -126,6 +141,8 @@ CREATE TABLE password_tokens (
     token TEXT NOT NULL,
     exp BIGINT NOT NULL
 );
+
+-- INSERT DUMMY DATA
 
 INSERT INTO user_roles (name) VALUES
  ('Administrator')
@@ -834,7 +851,7 @@ INSERT INTO teacher_books (teacher_id, title, author, genres, description, readi
 
 -- CREATE FUNCTIONS
 
-CREATE OR REPLACE FUNCTION cl_sign_up(u_input TEXT, p_input TEXT, t_input TEXT, fn_input TEXT, ln_input TEXT, e_input TEXT, z_input TEXT, sn_input TEXT, r_input INTEGER)
+CREATE OR REPLACE FUNCTION cl_sign_up(u_input TEXT, p_input PASSWORD, t_input TEXT, fn_input TEXT, ln_input TEXT, e_input TEXT, z_input TEXT, sn_input TEXT, r_input INTEGER)
 RETURNS TEXT AS $$
 DECLARE
     gen_user_id TEXT;
@@ -859,7 +876,7 @@ END
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION cl_sign_in(u_input TEXT, p_input TEXT)
-RETURNS TABLE(user_id TEXT, teacher_id TEXT, username TEXT, role_id INTEGER) AS $$
+RETURNS TABLE(user_id TEXT, teacher_id TEXT, username NETEXT, role_id INTEGER) AS $$
 DECLARE
     user_salt TEXT;
     hashed_pass TEXT;
@@ -889,7 +906,7 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION cl_reset_password(e_input TEXT, t_input TEXT, p_input TEXT)
+CREATE OR REPLACE FUNCTION cl_reset_password(e_input TEXT, t_input TEXT, p_input PASSWORD)
 RETURNS TEXT AS $$
 DECLARE
     get_user_id TEXT;
@@ -999,7 +1016,7 @@ END
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION cl_overdue_books(t_input TEXT)
-RETURNS TABLE(student_id INTEGER, first_name TEXT, last_name TEXT, book_id INTEGER, title NETEXT, date_due BIGINT) AS $$
+RETURNS TABLE(student_id INTEGER, first_name NETEXT, last_name NETEXT, book_id INTEGER, title NETEXT, date_due BIGINT) AS $$
 DECLARE
     gen_date BIGINT;
 BEGIN

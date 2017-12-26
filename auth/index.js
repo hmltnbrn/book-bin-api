@@ -6,7 +6,6 @@ let express = require('express'),
     router = express.Router();
 
 router.post('/SignUp', function(req, res, next) {
-  if(!req.body.password) return res.status(500).json({ status: false, message: "Password missing" });
   return db.query("SELECT * FROM cl_sign_up($1, $2, $3, $4, $5, $6, $7, $8, $9)", [req.body.username, req.body.password, req.body.title, req.body.firstName, req.body.lastName, req.body.email, req.body.zip, req.body.schoolName, req.body.role], true, req.body.username + " sign up attempt")
     .then(user => {
       if(user.cl_sign_up == 'false') return res.status(400).json({ status: false, message: "Username or email already in use" });
@@ -67,7 +66,6 @@ router.post('/ForgotPassword', function(req, res, next) {
 });
 
 router.post('/ResetPassword', function(req, res, next) {
-  if(!req.body.password) return res.status(500).json({ status: false, message: "Password missing" });
   return db.query("SELECT * FROM cl_reset_password($1, $2, $3)", [req.body.email, req.body.token, req.body.password], true, req.body.email + " reset password attempt")
     .then(token => {
       if(token.cl_reset_password == 'email') return res.status(400).json({ status: false, message: "Email or token invalid" });
