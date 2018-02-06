@@ -1,3 +1,21 @@
+/* START DROPS */
+
+DROP FUNCTION IF EXISTS cl_sign_up(u_input text, p_input password, t_input text, fn_input text, ln_input text, e_input text, z_input text, sn_input text, r_input integer);
+DROP FUNCTION IF EXISTS cl_sign_in(u_input text, p_input text);
+DROP FUNCTION IF EXISTS cl_password_token(e_input text);
+DROP FUNCTION IF EXISTS cl_reset_password(e_input text, t_input text, p_input password);
+DROP FUNCTION IF EXISTS cl_activate_account(t_input text);
+DROP FUNCTION IF EXISTS cl_forgot_username(e_input text);
+DROP FUNCTION IF EXISTS cl_check_out(t_input text, b_input integer, s_input integer, d_input bigint);
+DROP FUNCTION IF EXISTS cl_check_in(t_input text, b_input integer, s_input integer);
+DROP FUNCTION IF EXISTS cl_check_in_students(t_input text, b_input integer, s_input integer[]);
+DROP FUNCTION IF EXISTS cl_delete_book(b_input integer, t_input text);
+DROP FUNCTION IF EXISTS cl_overdue_books(t_input text);
+
+/* END DROPS */
+
+/* START CREATES */
+
 CREATE OR REPLACE FUNCTION cl_sign_up(u_input TEXT, p_input PASSWORD, t_input TEXT, fn_input TEXT, ln_input TEXT, e_input TEXT, z_input TEXT, sn_input TEXT, r_input INTEGER)
 RETURNS TEXT AS $$
 DECLARE
@@ -171,3 +189,5 @@ BEGIN
     RETURN QUERY SELECT c.student_id, s.first_name, s.last_name, c.book_id, b.title, c.date_due FROM teacher_books b, students s, checked_out_books c WHERE b.id = c.book_id AND s.id = c.student_id AND c.teacher_id = $1 AND c.date_due < gen_date AND c.date_due IS NOT NULL AND c.date_in IS NULL ORDER BY c.date_due DESC, s.last_name;
 END
 $$ LANGUAGE plpgsql;
+
+/* END CREATES */

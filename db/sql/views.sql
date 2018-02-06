@@ -1,3 +1,11 @@
+/* START DROPS */
+
+DROP VIEW IF EXISTS student_books_view;
+
+/* END DROPS */
+
+/* START CREATES */
+
 CREATE OR REPLACE VIEW student_books_view
 AS
     SELECT
@@ -28,3 +36,5 @@ AS
         ch.student_id = s.id AND
         ch.book_id = b.id AND
         s.class_id = c.id;
+
+/* END CREATES */

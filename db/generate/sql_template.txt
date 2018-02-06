@@ -1,0 +1,9 @@
+$function_drops
+$view_drops
+$table_drops
+$domain_drops
+$domain_creates
+$table_creates
+$data_creates
+$function_creates
+$view_creates
