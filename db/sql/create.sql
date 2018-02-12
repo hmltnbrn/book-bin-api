@@ -928,6 +928,29 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION cl_change_password(u_input TEXT, op_input TEXT, np_input PASSWORD)
+RETURNS TEXT AS $$
+DECLARE
+    old_user_salt TEXT;
+    old_hashed_pass TEXT;
+    new_user_salt TEXT;
+    new_hashed_pass TEXT;
+BEGIN
+    SELECT salt INTO old_user_salt FROM users WHERE id = $1 AND activated = TRUE;
+    IF old_user_salt IS NULL THEN
+      RETURN 'user';
+    END IF;
+    SELECT * INTO old_hashed_pass FROM encode(digest($2 || old_user_salt, 'sha256'), 'hex');
+    IF NOT EXISTS(SELECT * FROM users WHERE id = $1 AND password = old_hashed_pass) THEN
+        RETURN 'password';
+    END IF;
+    SELECT * INTO new_user_salt FROM gen_salt('bf');
+    SELECT * INTO new_hashed_pass FROM encode(digest($3 || new_user_salt, 'sha256'), 'hex');
+    UPDATE users SET password = new_hashed_pass, salt = new_user_salt WHERE id = $1;
+    RETURN 'true';
+END
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION cl_activate_account(t_input TEXT)
 RETURNS BOOLEAN AS $$
 DECLARE

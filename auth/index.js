@@ -3,6 +3,7 @@ let express = require('express'),
     email = require('../email'),
     jwt = require('jsonwebtoken'),
     moment = require('moment'),
+    checkToken = require('./token').checkToken,
     router = express.Router();
 
 router.post('/SignUp', function(req, res, next) {
@@ -86,6 +87,30 @@ router.post('/ForgotUsername', function(req, res, next) {
         if(err) return res.status(500).json({ status: false, message: err.message });
         return res.status(200).json({ status: true, message: "Email sent" });
       });
+    })
+    .catch(err => {
+      console.log(err);
+      return res.status(500).json({ status: false, message: err.message });
+    });
+});
+
+router.post('/ChangePassword', checkToken, function(req, res, next) {
+  return db.query("SELECT * FROM cl_change_password($1, $2, $3)", [req.user.user_id, req.body.oldPassword, req.body.newPassword], true, req.user.user_id + " change password attempt")
+    .then(pass => {
+      if(pass.cl_change_password == 'user') return res.status(400).json({ status: false, message: "User does not exist" });
+      else if(pass.cl_change_password == 'password') return res.status(400).json({ status: false, message: "Old password does not match records" });
+      return res.status(200).json({ status: true, message: "Password changed" });
+    })
+    .catch(err => {
+      console.log(err);
+      return res.status(500).json({ status: false, message: err.message });
+    });
+});
+
+router.get('/Profile', checkToken, function(req, res, next) {
+  return db.query("SELECT * FROM teacher_details WHERE user_id = $1", [req.user.user_id], true, req.user.user_id + " get profile")
+    .then(result => {
+      return res.status(200).send(result);
     })
     .catch(err => {
       console.log(err);
