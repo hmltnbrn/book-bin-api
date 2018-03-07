@@ -1,9 +1,10 @@
--- DROP COMMANDS
+-- DROP FUNCTIONS
 
-DROP FUNCTION IF EXISTS cl_sign_up(u_input text, p_input password, t_input text, fn_input text, ln_input text, e_input text, z_input text, sn_input text, r_input integer);
+DROP FUNCTION IF EXISTS cl_sign_up(u_input text, p_input password, t_input text, fn_input text, ln_input text, e_input text, g_input text, sn_input text, z_input text, r_input integer);
 DROP FUNCTION IF EXISTS cl_sign_in(u_input text, p_input text);
 DROP FUNCTION IF EXISTS cl_password_token(e_input text);
 DROP FUNCTION IF EXISTS cl_reset_password(e_input text, t_input text, p_input password);
+DROP FUNCTION IF EXISTS cl_change_password(u_input TEXT, op_input TEXT, np_input password);
 DROP FUNCTION IF EXISTS cl_activate_account(t_input text);
 DROP FUNCTION IF EXISTS cl_forgot_username(e_input text);
 DROP FUNCTION IF EXISTS cl_check_out(t_input text, b_input integer, s_input integer, d_input bigint);
@@ -12,7 +13,11 @@ DROP FUNCTION IF EXISTS cl_check_in_students(t_input text, b_input integer, s_in
 DROP FUNCTION IF EXISTS cl_delete_book(b_input integer, t_input text);
 DROP FUNCTION IF EXISTS cl_overdue_books(t_input text);
 
+-- DROP VIEWS
+
 DROP VIEW IF EXISTS student_books_view;
+
+-- DROP TABLES
 
 DROP TABLE IF EXISTS users
 , user_roles
@@ -25,6 +30,8 @@ DROP TABLE IF EXISTS users
 , activation_tokens
 , password_tokens;
 
+-- DROP DOMAINS
+
 DROP DOMAIN IF EXISTS NETEXT;
 DROP DOMAIN IF EXISTS PASSWORD;
 DROP DOMAIN IF EXISTS EMAIL;
@@ -34,13 +41,10 @@ DROP DOMAIN IF EXISTS ZIPCODE;
 
 CREATE DOMAIN NETEXT AS TEXT
 CONSTRAINT not_empty CHECK (LENGTH(VALUE) > 0);
-
 CREATE DOMAIN PASSWORD AS TEXT
-CONSTRAINT valid_password CHECK (VALUE ~ '^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()])[A-Za-z\d!@#$%^&*()]{8,}');
-
+CONSTRAINT valid_password CHECK (VALUE ~ '^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()])[A-Za-z\d!@#$%^&*()]{8,}$');
 CREATE DOMAIN EMAIL AS TEXT
 CONSTRAINT valid_email CHECK (VALUE ~ '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$');
-
 CREATE DOMAIN ZIPCODE AS TEXT
 CONSTRAINT valid_zip CHECK (VALUE ~ '^\d{5}$');
 
@@ -50,7 +54,6 @@ CREATE TABLE user_roles (
     id SERIAL PRIMARY KEY NOT NULL,
     name TEXT NOT NULL
 ); /* Administrator, Teacher, Librarian */
-
 CREATE TABLE users (
     id TEXT PRIMARY KEY NOT NULL,
     username NETEXT NOT NULL,
@@ -59,7 +62,6 @@ CREATE TABLE users (
     role_id INTEGER REFERENCES user_roles (id),
     activated BOOLEAN NOT NULL DEFAULT FALSE
 );
-
 CREATE TABLE teacher_details (
     id TEXT PRIMARY KEY NOT NULL,
     user_id TEXT NOT NULL REFERENCES users (id),
@@ -67,17 +69,16 @@ CREATE TABLE teacher_details (
     first_name NETEXT NOT NULL,
     last_name NETEXT NOT NULL,
     email EMAIL NOT NULL,
-    zip ZIPCODE NOT NULL,
-    school_name NETEXT NOT NULL
+    grade NETEXT NOT NULL,
+    school_name NETEXT NOT NULL,
+    zip ZIPCODE NOT NULL
 );
-
 CREATE TABLE classes (
     id SERIAL PRIMARY KEY NOT NULL,
     teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
     name NETEXT NOT NULL,
     obsolete BOOLEAN NOT NULL DEFAULT FALSE
 );
-
 CREATE TABLE students (
     id SERIAL PRIMARY KEY NOT NULL,
     first_name NETEXT NOT NULL,
@@ -88,7 +89,6 @@ CREATE TABLE students (
     active BOOLEAN NOT NULL DEFAULT TRUE,
     obsolete BOOLEAN NOT NULL DEFAULT FALSE
 );
-
 CREATE TABLE librarian_details (
     id TEXT PRIMARY KEY NOT NULL,
     user_id TEXT NOT NULL REFERENCES users (id),
@@ -100,7 +100,6 @@ CREATE TABLE librarian_details (
     zip ZIPCODE NOT NULL,
     school_name NETEXT NOT NULL
 );
-
 CREATE TABLE teacher_books (
     id SERIAL PRIMARY KEY NOT NULL,
     teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
@@ -116,7 +115,6 @@ CREATE TABLE teacher_books (
     CONSTRAINT valid_numbers CHECK (number_in >= 0 AND number_out >= 0),
     CONSTRAINT valid_total CHECK (number_in + number_out >= 1)
 );
-
 CREATE TABLE checked_out_books (
     id SERIAL PRIMARY KEY NOT NULL,
     teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
@@ -128,13 +126,11 @@ CREATE TABLE checked_out_books (
     obsolete BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT valid_date_due CHECK (date_due > date_out)
 );
-
 CREATE TABLE activation_tokens (
     id SERIAL PRIMARY KEY NOT NULL,
     user_id TEXT NOT NULL,
     token TEXT NOT NULL
 );
-
 CREATE TABLE password_tokens (
     id SERIAL PRIMARY KEY NOT NULL,
     user_id TEXT NOT NULL,
@@ -142,24 +138,20 @@ CREATE TABLE password_tokens (
     exp BIGINT NOT NULL
 );
 
--- INSERT DUMMY DATA
+-- CREATE DATA
 
 INSERT INTO user_roles (name) VALUES
  ('Administrator')
 ,('Teacher')
 ,('Librarian');
-
 INSERT INTO users (id, username, password, salt, role_id, activated) VALUES
  ('317a22933f23e46593fbabe76ff82d1e','hmltnbrn','e970fab4c326d04961148e659985994c183f08a966bb8d725f35dc748699f795','$2a$06$qiGav.GHV1Z3rljxUZcxye',2,TRUE);
-
-INSERT INTO teacher_details (id, user_id, title, first_name, last_name, email, zip, school_name) VALUES
- ('9a237f7c6bbd539586f27b43d87183e5','317a22933f23e46593fbabe76ff82d1e','Mr.','Brian','Hamilton','hmltnbrn@gmail.com','11105','Wagner Middle School');
-
+INSERT INTO teacher_details (id, user_id, title, first_name, last_name, email, grade, school_name, zip) VALUES
+ ('9a237f7c6bbd539586f27b43d87183e5','317a22933f23e46593fbabe76ff82d1e','Mr.','Brian','Hamilton','hmltnbrn@gmail.com','6th','Wagner Middle School','11105');
 INSERT INTO classes (teacher_id, name) VALUES
  ('9a237f7c6bbd539586f27b43d87183e5', '613')
 ,('9a237f7c6bbd539586f27b43d87183e5', '614')
 ,('9a237f7c6bbd539586f27b43d87183e5', '615');
-
 INSERT INTO students (first_name, last_name, email, reading_level, class_id) VALUES
  ('Brian','Roberts','brian.roberts@school.com','Z',1)
 ,('Kevin','Costner','kevin.costner@school.com','H',1)
@@ -177,7 +169,6 @@ INSERT INTO students (first_name, last_name, email, reading_level, class_id) VAL
 ,('Bill','James','bill.james@school.com','V',3)
 ,('Joseph','Biden','joseph.biden@school.com','O',3)
 ,('Jane','Seymour','jane.seymour@school.com','H',3);
-
 INSERT INTO teacher_books (teacher_id, title, author, genres, description, reading_level, number_in, number_out) VALUES
  ('9a237f7c6bbd539586f27b43d87183e5','1984','George Orwell','{"Classics","Science Fiction"}','Description of book goes here.','Z',1,0)
 ,('9a237f7c6bbd539586f27b43d87183e5','145th Street: Short Stories','Walter Dean Myers','{"Realistic Fiction"}','Description of book goes here.','Z',1,0)
@@ -851,7 +842,7 @@ INSERT INTO teacher_books (teacher_id, title, author, genres, description, readi
 
 -- CREATE FUNCTIONS
 
-CREATE OR REPLACE FUNCTION cl_sign_up(u_input TEXT, p_input PASSWORD, t_input TEXT, fn_input TEXT, ln_input TEXT, e_input TEXT, z_input TEXT, sn_input TEXT, r_input INTEGER)
+CREATE OR REPLACE FUNCTION cl_sign_up(u_input TEXT, p_input PASSWORD, t_input TEXT, fn_input TEXT, ln_input TEXT, e_input TEXT, g_input TEXT, sn_input TEXT, z_input TEXT, r_input INTEGER)
 RETURNS TEXT AS $$
 DECLARE
     gen_user_id TEXT;
@@ -868,13 +859,12 @@ BEGIN
     SELECT * INTO gen_user_salt FROM gen_salt('bf');
     SELECT * INTO hashed_pass FROM encode(digest($2 || gen_user_salt, 'sha256'), 'hex');
     SELECT * INTO activation_token FROM encode(gen_random_bytes(16), 'hex');
-    INSERT INTO users (id, username, password, salt, role_id) VALUES (gen_user_id, $1, hashed_pass, gen_user_salt, $9);
-    INSERT INTO teacher_details (id, user_id, title, first_name, last_name, email, zip, school_name) VALUES (gen_teacher_id, gen_user_id, $3, $4, $5, $6, $7, $8);
+    INSERT INTO users (id, username, password, salt, role_id) VALUES (gen_user_id, $1, hashed_pass, gen_user_salt, $10);
+    INSERT INTO teacher_details (id, user_id, title, first_name, last_name, email, grade, school_name, zip) VALUES (gen_teacher_id, gen_user_id, $3, $4, $5, $6, $7, $8, $9);
     INSERT INTO activation_tokens (user_id, token) VALUES (gen_user_id, activation_token);
     RETURN activation_token;
 END
 $$ LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION cl_sign_in(u_input TEXT, p_input TEXT)
 RETURNS TABLE(user_id TEXT, teacher_id TEXT, username NETEXT, role_id INTEGER) AS $$
 DECLARE
@@ -886,7 +876,6 @@ BEGIN
     RETURN QUERY SELECT u.id AS user_id, t.id AS teacher_id, u.username, u.role_id AS role_id FROM users u, teacher_details t WHERE u.id = t.user_id AND u.username = $1 AND u.password = hashed_pass;
 END
 $$ LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION cl_password_token(e_input TEXT)
 RETURNS TEXT AS $$
 DECLARE
@@ -905,7 +894,6 @@ BEGIN
     RETURN gen_token;
 END
 $$ LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION cl_reset_password(e_input TEXT, t_input TEXT, p_input PASSWORD)
 RETURNS TEXT AS $$
 DECLARE
@@ -927,7 +915,6 @@ BEGIN
     RETURN 'true';
 END
 $$ LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION cl_change_password(u_input TEXT, op_input TEXT, np_input PASSWORD)
 RETURNS TEXT AS $$
 DECLARE
@@ -950,7 +937,6 @@ BEGIN
     RETURN 'true';
 END
 $$ LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION cl_activate_account(t_input TEXT)
 RETURNS BOOLEAN AS $$
 DECLARE
@@ -964,7 +950,6 @@ BEGIN
     RETURN TRUE;
 END
 $$ LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION cl_forgot_username(e_input TEXT)
 RETURNS TEXT AS $$
 DECLARE
@@ -977,7 +962,6 @@ BEGIN
     RETURN get_username;
 END
 $$ LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION cl_check_out(t_input TEXT, b_input INTEGER, s_input INTEGER, d_input BIGINT)
 RETURNS BOOLEAN AS $$
 DECLARE
@@ -992,7 +976,6 @@ BEGIN
     RETURN TRUE;
 END
 $$ LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION cl_check_in(t_input TEXT, b_input INTEGER, s_input INTEGER)
 RETURNS BOOLEAN AS $$
 DECLARE
@@ -1007,7 +990,6 @@ BEGIN
     RETURN TRUE;
 END
 $$ LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION cl_check_in_students(t_input TEXT, b_input INTEGER, s_input INTEGER[])
 RETURNS BOOLEAN AS $$
 DECLARE
@@ -1026,7 +1008,6 @@ BEGIN
     RETURN TRUE;
 END
 $$ LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION cl_delete_book(b_input INTEGER, t_input TEXT)
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -1037,7 +1018,6 @@ BEGIN
     RETURN TRUE;
 END
 $$ LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION cl_overdue_books(t_input TEXT)
 RETURNS TABLE(student_id INTEGER, first_name NETEXT, last_name NETEXT, book_id INTEGER, title NETEXT, date_due BIGINT) AS $$
 DECLARE

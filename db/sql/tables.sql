@@ -36,8 +36,9 @@ CREATE TABLE teacher_details (
     first_name NETEXT NOT NULL,
     last_name NETEXT NOT NULL,
     email EMAIL NOT NULL,
-    zip ZIPCODE NOT NULL,
-    school_name NETEXT NOT NULL
+    grade NETEXT NOT NULL,
+    school_name NETEXT NOT NULL,
+    zip ZIPCODE NOT NULL
 );
 
 CREATE TABLE classes (

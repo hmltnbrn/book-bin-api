@@ -7,7 +7,7 @@ let express = require('express'),
     router = express.Router();
 
 router.post('/SignUp', function(req, res, next) {
-  return db.query("SELECT * FROM cl_sign_up($1, $2, $3, $4, $5, $6, $7, $8, $9)", [req.body.username, req.body.password, req.body.title, req.body.firstName, req.body.lastName, req.body.email, req.body.zip, req.body.schoolName, req.body.role], true, req.body.username + " sign up attempt")
+  return db.query("SELECT * FROM cl_sign_up($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", [req.body.username, req.body.password, req.body.title, req.body.firstName, req.body.lastName, req.body.email, req.body.grade, req.body.schoolName, req.body.zip, req.body.role], true, req.body.username + " sign up attempt")
     .then(user => {
       if(user.cl_sign_up == 'false') return res.status(400).json({ status: false, message: "Username or email already in use" });
       email.activateAccount(req.body.username, req.body.email, user.cl_sign_up, function(err, status) {

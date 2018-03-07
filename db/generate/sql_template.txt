@@ -1,9 +1,35 @@
-$function_drops
-$view_drops
-$table_drops
-$domain_drops
-$domain_creates
-$table_creates
-$data_creates
-$function_creates
-$view_creates
+-- DROP FUNCTIONS
+
+-functions_drops-
+
+-- DROP VIEWS
+
+-views_drops-
+
+-- DROP TABLES
+
+-tables_drops-
+
+-- DROP DOMAINS
+
+-domains_drops-
+
+-- CREATE DOMAINS
+
+-domains_creates-
+
+-- CREATE TABLES
+
+-tables_creates-
+
+-- CREATE DATA
+
+-data_creates-
+
+-- CREATE FUNCTIONS
+
+-functions_creates-
+
+-- CREATE VIEWS
+
+-views_creates-

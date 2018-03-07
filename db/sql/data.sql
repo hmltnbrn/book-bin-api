@@ -8,8 +8,8 @@ INSERT INTO user_roles (name) VALUES
 INSERT INTO users (id, username, password, salt, role_id, activated) VALUES
  ('317a22933f23e46593fbabe76ff82d1e','hmltnbrn','e970fab4c326d04961148e659985994c183f08a966bb8d725f35dc748699f795','$2a$06$qiGav.GHV1Z3rljxUZcxye',2,TRUE);
 
-INSERT INTO teacher_details (id, user_id, title, first_name, last_name, email, zip, school_name) VALUES
- ('9a237f7c6bbd539586f27b43d87183e5','317a22933f23e46593fbabe76ff82d1e','Mr.','Brian','Hamilton','hmltnbrn@gmail.com','11105','Wagner Middle School');
+INSERT INTO teacher_details (id, user_id, title, first_name, last_name, email, grade, school_name, zip) VALUES
+ ('9a237f7c6bbd539586f27b43d87183e5','317a22933f23e46593fbabe76ff82d1e','Mr.','Brian','Hamilton','hmltnbrn@gmail.com','6th','Wagner Middle School','11105');
 
 INSERT INTO classes (teacher_id, name) VALUES
  ('9a237f7c6bbd539586f27b43d87183e5', '613')

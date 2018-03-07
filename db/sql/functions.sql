@@ -1,9 +1,10 @@
 /* START DROPS */
 
-DROP FUNCTION IF EXISTS cl_sign_up(u_input text, p_input password, t_input text, fn_input text, ln_input text, e_input text, z_input text, sn_input text, r_input integer);
+DROP FUNCTION IF EXISTS cl_sign_up(u_input text, p_input password, t_input text, fn_input text, ln_input text, e_input text, g_input text, sn_input text, z_input text, r_input integer);
 DROP FUNCTION IF EXISTS cl_sign_in(u_input text, p_input text);
 DROP FUNCTION IF EXISTS cl_password_token(e_input text);
 DROP FUNCTION IF EXISTS cl_reset_password(e_input text, t_input text, p_input password);
+DROP FUNCTION IF EXISTS cl_change_password(u_input TEXT, op_input TEXT, np_input password);
 DROP FUNCTION IF EXISTS cl_activate_account(t_input text);
 DROP FUNCTION IF EXISTS cl_forgot_username(e_input text);
 DROP FUNCTION IF EXISTS cl_check_out(t_input text, b_input integer, s_input integer, d_input bigint);
@@ -16,7 +17,7 @@ DROP FUNCTION IF EXISTS cl_overdue_books(t_input text);
 
 /* START CREATES */
 
-CREATE OR REPLACE FUNCTION cl_sign_up(u_input TEXT, p_input PASSWORD, t_input TEXT, fn_input TEXT, ln_input TEXT, e_input TEXT, z_input TEXT, sn_input TEXT, r_input INTEGER)
+CREATE OR REPLACE FUNCTION cl_sign_up(u_input TEXT, p_input PASSWORD, t_input TEXT, fn_input TEXT, ln_input TEXT, e_input TEXT, g_input TEXT, sn_input TEXT, z_input TEXT, r_input INTEGER)
 RETURNS TEXT AS $$
 DECLARE
     gen_user_id TEXT;
@@ -33,8 +34,8 @@ BEGIN
     SELECT * INTO gen_user_salt FROM gen_salt('bf');
     SELECT * INTO hashed_pass FROM encode(digest($2 || gen_user_salt, 'sha256'), 'hex');
     SELECT * INTO activation_token FROM encode(gen_random_bytes(16), 'hex');
-    INSERT INTO users (id, username, password, salt, role_id) VALUES (gen_user_id, $1, hashed_pass, gen_user_salt, $9);
-    INSERT INTO teacher_details (id, user_id, title, first_name, last_name, email, zip, school_name) VALUES (gen_teacher_id, gen_user_id, $3, $4, $5, $6, $7, $8);
+    INSERT INTO users (id, username, password, salt, role_id) VALUES (gen_user_id, $1, hashed_pass, gen_user_salt, $10);
+    INSERT INTO teacher_details (id, user_id, title, first_name, last_name, email, grade, school_name, zip) VALUES (gen_teacher_id, gen_user_id, $3, $4, $5, $6, $7, $8, $9);
     INSERT INTO activation_tokens (user_id, token) VALUES (gen_user_id, activation_token);
     RETURN activation_token;
 END
