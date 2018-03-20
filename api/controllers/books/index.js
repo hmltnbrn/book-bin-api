@@ -2,27 +2,30 @@ let express = require('express'),
     router = express.Router();
 
 let books = require('./books');
+let checkOut = require('./check-out.books');
+let checkIn = require('./check-in.books');
+let teacherBooks = require('./teacher-books.books');
+let students = require('./students.books');
 
 // api/Books/TeacherBooks
-router.get('/TeacherBooks', books.getAllTeacherBooks);
-router.post('/TeacherBooks', books.postTeacherBook);
-router.get('/TeacherBooks/:id', books.getTeacherBook);
-router.delete('/TeacherBooks/:id', books.deleteTeacherBook);
+router.get('/TeacherBooks', teacherBooks.getAll);
+router.get('/TeacherBooks/:id', teacherBooks.get);
+router.put('/TeacherBooks', teacherBooks.put);
+router.patch('/TeacherBooks', teacherBooks.patch);
+router.delete('/TeacherBooks/:id', teacherBooks.delete);
 
 // api/Books/CheckOut
-router.post('/CheckOut', books.postCheckOutBook);
+router.post('/CheckOut', checkOut.post);
 
 // api/Books/CheckIn
-router.post('/CheckIn', books.postCheckInBook);
-router.post('/CheckIn/Students', books.postStudentsCheckInBook, books.getTeacherBook);
+router.post('/CheckIn', checkIn.post);
+router.post('/CheckIn/Students', checkIn.postWithStudents, teacherBooks.get);
 
 // api/Books/Students
-router.get('/Students', books.getStudentsWithBook);
-
-router.get('/Dashboard', books.getBooksDashboard);
+router.get('/Students', students.getAll);
 
 // api/Books
-router.get('/', books.getAllBooks);
-router.get('/:id', books.getBook);
+router.get('/', books.getAll);
+router.get('/:id', books.get);
 
 module.exports = router;
