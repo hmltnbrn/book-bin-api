@@ -4,7 +4,6 @@ let db = require('../../../db'),
 let escape = s => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
 exports.getAll = function (req, res, next) {
-
   let pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 12,
       page = req.query.page ? parseInt(req.query.page) : 1,
       search = req.query.search,
@@ -50,11 +49,9 @@ exports.getAll = function (req, res, next) {
       console.log(err);
       return res.status(500).json({ status: false, message: err.message });
     });
-
 }
 
 exports.get = function (req, res, next) {
-
   let id = req.params.id || req.body.book_id,
       response = {};
 
@@ -102,8 +99,7 @@ exports.patch = function (req, res, next) {
   let fields = Object.keys(req.body),
       values = fields.map((k) => req.body[k]);
 
-  let sql = "UPDATE teacher_books " + helper.updateHelper(fields) + 
-    " WHERE id = $" + (fields.length + 1) + " AND teacher_id = $" + (fields.length + 2) + " RETURNING *";
+  let sql = `UPDATE teacher_books ${helper.updateHelper(fields)} WHERE id = $${fields.length + 1} AND teacher_id = $${fields.length + 2} RETURNING *`;
 
   return db.query(sql, values.concat([req.body.id, req.user.teacher_id]), true)
     .then(book => {
