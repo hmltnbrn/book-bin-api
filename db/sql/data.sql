@@ -11,28 +11,51 @@ INSERT INTO users (id, username, password, salt, role_id, activated) VALUES
 INSERT INTO teacher_details (id, user_id, title, first_name, last_name, email, grade, school_name, zip) VALUES
  ('9a237f7c6bbd539586f27b43d87183e5','317a22933f23e46593fbabe76ff82d1e','Mr.','Brian','Hamilton','hmltnbrn@gmail.com','6th','Wagner Middle School','11105');
 
-INSERT INTO classes (teacher_id, name) VALUES
- ('9a237f7c6bbd539586f27b43d87183e5', '613')
-,('9a237f7c6bbd539586f27b43d87183e5', '614')
-,('9a237f7c6bbd539586f27b43d87183e5', '615');
+INSERT INTO classes (name) VALUES
+ ('613')
+,('614')
+,('615');
 
-INSERT INTO students (first_name, last_name, email, reading_level, class_id) VALUES
- ('Brian','Roberts','brian.roberts@school.com','Z',1)
-,('Kevin','Costner','kevin.costner@school.com','H',1)
-,('Hiram','Catz','hiram.catz@school.com','F',1)
-,('David','Yahoo','david.yahoo@school.com','Y',1)
-,('Olivia','Wilde','olivia.wilde@school.com','W',1)
-,('Barack','Obama','barack.obama@school.com','Z',2)
-,('Helen','Keller','helen.keller@school.com','O',2)
-,('Donald','Trump','donald.trump@school.com','A',2)
-,('George','Bush','george.bush@school.com','D',2)
-,('Beverly','Crusher','beverly.crusher@school.com','W',2)
-,('Hillary','Clinton','hillary.clinton@school.com','J',2)
-,('James','Cook','james.cook@school.com','J',3)
-,('Eleanor','Roosevelt','eleanor.roosevelt@school.com','U',3)
-,('Bill','James','bill.james@school.com','V',3)
-,('Joseph','Biden','joseph.biden@school.com','O',3)
-,('Jane','Seymour','jane.seymour@school.com','H',3);
+INSERT INTO teacher_classes (teacher_id, class_id) VALUES
+ ('9a237f7c6bbd539586f27b43d87183e5',1)
+,('9a237f7c6bbd539586f27b43d87183e5',2)
+,('9a237f7c6bbd539586f27b43d87183e5',3);
+
+INSERT INTO students (first_name, last_name, email, reading_level) VALUES
+ ('Brian','Roberts','brian.roberts@school.com','Z')
+,('Kevin','Costner','kevin.costner@school.com','H')
+,('Hiram','Catz','hiram.catz@school.com','F')
+,('David','Yahoo','david.yahoo@school.com','Y')
+,('Olivia','Wilde','olivia.wilde@school.com','W')
+,('Barack','Obama','barack.obama@school.com','Z')
+,('Helen','Keller','helen.keller@school.com','O')
+,('Donald','Trump','donald.trump@school.com','A')
+,('George','Bush','george.bush@school.com','D')
+,('Beverly','Crusher','beverly.crusher@school.com','W')
+,('Hillary','Clinton','hillary.clinton@school.com','J')
+,('James','Cook','james.cook@school.com','J')
+,('Eleanor','Roosevelt','eleanor.roosevelt@school.com','U')
+,('Bill','James','bill.james@school.com','V')
+,('Joseph','Biden','joseph.biden@school.com','O')
+,('Jane','Seymour','jane.seymour@school.com','H');
+
+INSERT INTO student_classes (student_id, class_id) VALUES
+ (1,1)
+,(2,1)
+,(3,1)
+,(4,1)
+,(5,1)
+,(6,2)
+,(7,2)
+,(8,2)
+,(9,2)
+,(10,2)
+,(11,2)
+,(12,3)
+,(13,3)
+,(14,3)
+,(15,3)
+,(16,3);
 
 INSERT INTO teacher_books (teacher_id, title, author, genres, description, reading_level, number_in, number_out) VALUES
  ('9a237f7c6bbd539586f27b43d87183e5','1984','George Orwell','{"Classics","Science Fiction"}','Description of book goes here.','Z',1,0)

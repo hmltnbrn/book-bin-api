@@ -1,6 +1,7 @@
 /* START DROPS */
 
 DROP VIEW IF EXISTS student_books_view;
+DROP VIEW IF EXISTS teacher_students_view;
 
 /* END DROPS */
 
@@ -29,12 +30,47 @@ AS
         ch.teacher_id
     FROM
         students s,
+        student_classes sc,
         classes c,
         teacher_books b,
         checked_out_books ch
     WHERE
         ch.student_id = s.id AND
         ch.book_id = b.id AND
-        s.class_id = c.id;
+        sc.class_id = c.id AND
+        sc.student_id = s.id;
+
+CREATE OR REPLACE VIEW teacher_students_view
+AS
+    SELECT
+        t.id AS teacher_id,
+        t.title AS teacher_title,
+        t.first_name AS teacher_first_name,
+        t.last_name AS teacher_last_name,
+        t.email AS teacher_email,
+        t.grade,
+        t.school_name,
+        t.zip,
+        c.id AS class_id,
+        c.name AS class_name,
+        s.id AS student_id,
+        s.first_name AS student_first_name,
+        s.last_name AS student_last_name,
+        s.email AS student_email,
+        s.reading_level,
+        s.active
+    FROM
+        teacher_details t,
+        students s,
+        classes c,
+        student_classes sc,
+        teacher_classes tc
+    WHERE
+        sc.student_id = s.id AND
+        sc.class_id = c.id AND
+        tc.class_id = c.id AND
+        tc.teacher_id = t.id AND
+        c.obsolete IS NOT TRUE AND
+        s.obsolete IS NOT TRUE;
 
 /* END CREATES */

@@ -3,7 +3,8 @@ let db = require('../../../db');
 let escape = s => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
 exports.getAll = function (req, res, next) {
-  let pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 12,
+  let returnAll = req.query.returnAll,
+      pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 12,
       page = req.query.page ? parseInt(req.query.page) : 1,
       search = req.query.search,
       readingLevel = req.query.readingLevel,
@@ -17,22 +18,22 @@ exports.getAll = function (req, res, next) {
   }
 
   values.push(req.user.teacher_id);
-  whereParts.push("c.teacher_id = $" + values.length);
+  whereParts.push("teacher_id = $" + values.length);
 
-  whereParts.push("s.class_id = c.id");
-
-  whereParts.push("s.active IS TRUE");
+  whereParts.push("active IS TRUE");
 
   let where = whereParts.length > 0 ? ("WHERE " + whereParts.join(" AND ")) : "";
 
-  let countSql = "SELECT COUNT(s.*) FROM students s, classes c " + where;
+  let countSql = "SELECT COUNT(*) FROM teacher_students_view " + where;
 
-  let sql = `SELECT s.* FROM students s, classes c ${where} ORDER BY first_name LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+  let sql = `SELECT student_id AS id, student_first_name AS first_name, student_last_name AS last_name, student_email AS email FROM teacher_students_view ${where} ORDER BY first_name`;
+  
+  if(!returnAll) sql += ` LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
 
   return db.query(countSql, values)
     .then(result => {
       totalItems = parseInt(result[0].count);
-      return db.query(sql, values.concat([pageSize, ((page - 1) * pageSize)]))
+      return db.query(sql, returnAll ? values : values.concat([pageSize, ((page - 1) * pageSize)]))
     })
     .then(students => {
       pageTotal = Math.ceil(totalItems/pageSize);

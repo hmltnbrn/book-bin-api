@@ -1,15 +1,18 @@
 /* START DROPS */
 
-DROP TABLE IF EXISTS users
-, user_roles
-, teacher_details
-, librarian_details
-, teacher_books
-, classes
-, students
-, checked_out_books
+DROP TABLE IF EXISTS
+  password_tokens
 , activation_tokens
-, password_tokens;
+, checked_out_books
+, teacher_books
+, librarian_details
+, student_classes
+, students
+, teacher_classes
+, classes
+, teacher_details
+, users
+, user_roles;
 
 /* END DROPS */
 
@@ -25,6 +28,7 @@ CREATE TABLE users (
     username NETEXT NOT NULL,
     password NETEXT NOT NULL,
     salt TEXT NOT NULL,
+    register_date BIGINT NOT NULL DEFAULT extract(epoch FROM now()),
     role_id INTEGER REFERENCES user_roles (id),
     activated BOOLEAN NOT NULL DEFAULT FALSE
 );
@@ -43,9 +47,14 @@ CREATE TABLE teacher_details (
 
 CREATE TABLE classes (
     id SERIAL PRIMARY KEY NOT NULL,
-    teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
     name NETEXT NOT NULL,
     obsolete BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE TABLE teacher_classes (
+    id SERIAL PRIMARY KEY NOT NULL,
+    teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
+    class_id INTEGER NOT NULL REFERENCES classes (id)
 );
 
 CREATE TABLE students (
@@ -54,9 +63,14 @@ CREATE TABLE students (
     last_name NETEXT NOT NULL,
     email EMAIL,
     reading_level TEXT,
-    class_id INTEGER NOT NULL REFERENCES classes (id),
     active BOOLEAN NOT NULL DEFAULT TRUE,
     obsolete BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE TABLE student_classes (
+    id SERIAL PRIMARY KEY NOT NULL,
+    student_id INTEGER NOT NULL REFERENCES students (id),
+    class_id INTEGER NOT NULL REFERENCES classes (id)
 );
 
 CREATE TABLE librarian_details (

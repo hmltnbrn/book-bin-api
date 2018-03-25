@@ -16,19 +16,23 @@ DROP FUNCTION IF EXISTS cl_overdue_books(t_input text);
 -- DROP VIEWS
 
 DROP VIEW IF EXISTS student_books_view;
+DROP VIEW IF EXISTS teacher_students_view;
 
 -- DROP TABLES
 
-DROP TABLE IF EXISTS users
-, user_roles
-, teacher_details
-, librarian_details
-, teacher_books
-, classes
-, students
-, checked_out_books
+DROP TABLE IF EXISTS
+  password_tokens
 , activation_tokens
-, password_tokens;
+, checked_out_books
+, teacher_books
+, librarian_details
+, student_classes
+, students
+, teacher_classes
+, classes
+, teacher_details
+, users
+, user_roles;
 
 -- DROP DOMAINS
 
@@ -59,6 +63,7 @@ CREATE TABLE users (
     username NETEXT NOT NULL,
     password NETEXT NOT NULL,
     salt TEXT NOT NULL,
+    register_date BIGINT NOT NULL DEFAULT extract(epoch FROM now()),
     role_id INTEGER REFERENCES user_roles (id),
     activated BOOLEAN NOT NULL DEFAULT FALSE
 );
@@ -75,9 +80,13 @@ CREATE TABLE teacher_details (
 );
 CREATE TABLE classes (
     id SERIAL PRIMARY KEY NOT NULL,
-    teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
     name NETEXT NOT NULL,
     obsolete BOOLEAN NOT NULL DEFAULT FALSE
+);
+CREATE TABLE teacher_classes (
+    id SERIAL PRIMARY KEY NOT NULL,
+    teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
+    class_id INTEGER NOT NULL REFERENCES classes (id)
 );
 CREATE TABLE students (
     id SERIAL PRIMARY KEY NOT NULL,
@@ -85,9 +94,13 @@ CREATE TABLE students (
     last_name NETEXT NOT NULL,
     email EMAIL,
     reading_level TEXT,
-    class_id INTEGER NOT NULL REFERENCES classes (id),
     active BOOLEAN NOT NULL DEFAULT TRUE,
     obsolete BOOLEAN NOT NULL DEFAULT FALSE
+);
+CREATE TABLE student_classes (
+    id SERIAL PRIMARY KEY NOT NULL,
+    student_id INTEGER NOT NULL REFERENCES students (id),
+    class_id INTEGER NOT NULL REFERENCES classes (id)
 );
 CREATE TABLE librarian_details (
     id TEXT PRIMARY KEY NOT NULL,
@@ -148,27 +161,48 @@ INSERT INTO users (id, username, password, salt, role_id, activated) VALUES
  ('317a22933f23e46593fbabe76ff82d1e','hmltnbrn','e970fab4c326d04961148e659985994c183f08a966bb8d725f35dc748699f795','$2a$06$qiGav.GHV1Z3rljxUZcxye',2,TRUE);
 INSERT INTO teacher_details (id, user_id, title, first_name, last_name, email, grade, school_name, zip) VALUES
  ('9a237f7c6bbd539586f27b43d87183e5','317a22933f23e46593fbabe76ff82d1e','Mr.','Brian','Hamilton','hmltnbrn@gmail.com','6th','Wagner Middle School','11105');
-INSERT INTO classes (teacher_id, name) VALUES
- ('9a237f7c6bbd539586f27b43d87183e5', '613')
-,('9a237f7c6bbd539586f27b43d87183e5', '614')
-,('9a237f7c6bbd539586f27b43d87183e5', '615');
-INSERT INTO students (first_name, last_name, email, reading_level, class_id) VALUES
- ('Brian','Roberts','brian.roberts@school.com','Z',1)
-,('Kevin','Costner','kevin.costner@school.com','H',1)
-,('Hiram','Catz','hiram.catz@school.com','F',1)
-,('David','Yahoo','david.yahoo@school.com','Y',1)
-,('Olivia','Wilde','olivia.wilde@school.com','W',1)
-,('Barack','Obama','barack.obama@school.com','Z',2)
-,('Helen','Keller','helen.keller@school.com','O',2)
-,('Donald','Trump','donald.trump@school.com','A',2)
-,('George','Bush','george.bush@school.com','D',2)
-,('Beverly','Crusher','beverly.crusher@school.com','W',2)
-,('Hillary','Clinton','hillary.clinton@school.com','J',2)
-,('James','Cook','james.cook@school.com','J',3)
-,('Eleanor','Roosevelt','eleanor.roosevelt@school.com','U',3)
-,('Bill','James','bill.james@school.com','V',3)
-,('Joseph','Biden','joseph.biden@school.com','O',3)
-,('Jane','Seymour','jane.seymour@school.com','H',3);
+INSERT INTO classes (name) VALUES
+ ('613')
+,('614')
+,('615');
+INSERT INTO teacher_classes (teacher_id, class_id) VALUES
+ ('9a237f7c6bbd539586f27b43d87183e5',1)
+,('9a237f7c6bbd539586f27b43d87183e5',2)
+,('9a237f7c6bbd539586f27b43d87183e5',3);
+INSERT INTO students (first_name, last_name, email, reading_level) VALUES
+ ('Brian','Roberts','brian.roberts@school.com','Z')
+,('Kevin','Costner','kevin.costner@school.com','H')
+,('Hiram','Catz','hiram.catz@school.com','F')
+,('David','Yahoo','david.yahoo@school.com','Y')
+,('Olivia','Wilde','olivia.wilde@school.com','W')
+,('Barack','Obama','barack.obama@school.com','Z')
+,('Helen','Keller','helen.keller@school.com','O')
+,('Donald','Trump','donald.trump@school.com','A')
+,('George','Bush','george.bush@school.com','D')
+,('Beverly','Crusher','beverly.crusher@school.com','W')
+,('Hillary','Clinton','hillary.clinton@school.com','J')
+,('James','Cook','james.cook@school.com','J')
+,('Eleanor','Roosevelt','eleanor.roosevelt@school.com','U')
+,('Bill','James','bill.james@school.com','V')
+,('Joseph','Biden','joseph.biden@school.com','O')
+,('Jane','Seymour','jane.seymour@school.com','H');
+INSERT INTO student_classes (student_id, class_id) VALUES
+ (1,1)
+,(2,1)
+,(3,1)
+,(4,1)
+,(5,1)
+,(6,2)
+,(7,2)
+,(8,2)
+,(9,2)
+,(10,2)
+,(11,2)
+,(12,3)
+,(13,3)
+,(14,3)
+,(15,3)
+,(16,3);
 INSERT INTO teacher_books (teacher_id, title, author, genres, description, reading_level, number_in, number_out) VALUES
  ('9a237f7c6bbd539586f27b43d87183e5','1984','George Orwell','{"Classics","Science Fiction"}','Description of book goes here.','Z',1,0)
 ,('9a237f7c6bbd539586f27b43d87183e5','145th Street: Short Stories','Walter Dean Myers','{"Realistic Fiction"}','Description of book goes here.','Z',1,0)
@@ -1053,10 +1087,44 @@ AS
         ch.teacher_id
     FROM
         students s,
+        student_classes sc,
         classes c,
         teacher_books b,
         checked_out_books ch
     WHERE
         ch.student_id = s.id AND
         ch.book_id = b.id AND
-        s.class_id = c.id;
+        sc.class_id = c.id AND
+        sc.student_id = s.id;
+CREATE OR REPLACE VIEW teacher_students_view
+AS
+    SELECT
+        t.id AS teacher_id,
+        t.title AS teacher_title,
+        t.first_name AS teacher_first_name,
+        t.last_name AS teacher_last_name,
+        t.email AS teacher_email,
+        t.grade,
+        t.school_name,
+        t.zip,
+        c.id AS class_id,
+        c.name AS class_name,
+        s.id AS student_id,
+        s.first_name AS student_first_name,
+        s.last_name AS student_last_name,
+        s.email AS student_email,
+        s.reading_level,
+        s.active
+    FROM
+        teacher_details t,
+        students s,
+        classes c,
+        student_classes sc,
+        teacher_classes tc
+    WHERE
+        sc.student_id = s.id AND
+        sc.class_id = c.id AND
+        tc.class_id = c.id AND
+        tc.teacher_id = t.id AND
+        c.obsolete IS NOT TRUE AND
+        s.obsolete IS NOT TRUE;

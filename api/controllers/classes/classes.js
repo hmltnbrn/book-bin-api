@@ -4,11 +4,11 @@ let db = require('../../../db'),
 let escape = s => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
 exports.getAll = function (req, res, next) {
-  let sql = 'SELECT * FROM students WHERE obsolete IS NOT TRUE';
+  let sql = 'SELECT * FROM classes WHERE obsolete IS NOT TRUE';
 
   return db.query(sql)
-    .then(students => {
-      return res.status(200).json(students);
+    .then(classes => {
+      return res.status(200).json(classes);
     })
     .catch(err => {
       console.log(err);
@@ -17,12 +17,12 @@ exports.getAll = function (req, res, next) {
 }
 
 exports.get = function (req, res, next) {
-  let sql = 'SELECT * FROM students WHERE id = $1';
+  let sql = 'SELECT * FROM classes WHERE id = $1';
 
   return db.query(sql, [req.params.id], true)
-    .then(student => {
-      if(!student) return res.status(404).json({ status: false, message: "Student doesn't exist" });
-      return res.status(200).json(student);
+    .then(cl => {
+      if(!cl) return res.status(404).json({ status: false, message: "Class doesn't exist" });
+      return res.status(200).json(cl);
     })
     .catch(err => {
       console.log(err);
@@ -34,11 +34,11 @@ exports.put = function (req, res, next) {
   let fields = Object.keys(req.body),
       values = fields.map((k) => req.body[k]);
 
-  let sql = `INSERT INTO students (${helper.insertHelper(fields)} RETURNING *`;
+  let sql = `INSERT INTO classes (${helper.insertHelper(fields, 1)} RETURNING *`;
 
   return db.query(sql, values, true)
-    .then(student => {
-      return res.status(200).json(student);
+    .then(cl => {
+      return res.status(200).json(cl);
     })
     .catch(err => {
       console.log(err);
@@ -50,11 +50,11 @@ exports.patch = function (req, res, next) {
   let fields = Object.keys(req.body),
       values = fields.map((k) => req.body[k]);
 
-  let sql = `UPDATE students ${helper.updateHelper(fields)} WHERE id = $${fields.length + 1} RETURNING *`;
+  let sql = `UPDATE classes ${helper.updateHelper(fields)} WHERE id = $${fields.length + 1} RETURNING *`;
 
   return db.query(sql, values.concat([req.body.id]), true)
-    .then(student => {
-      return res.status(200).json(student);
+    .then(cl => {
+      return res.status(200).json(cl);
     })
     .catch(err => {
       console.log(err);
@@ -63,10 +63,10 @@ exports.patch = function (req, res, next) {
 }
 
 exports.delete = function (req, res, next) {
-  let sql = "UPDATE students SET obsolete = TRUE WHERE id = $1"
+  let sql = "UPDATE classes SET obsolete = TRUE WHERE id = $1"
 
   return db.query(sql, [req.params.id], true)
-    .then(student => {
+    .then(cl => {
       return res.status(200).json({ status: true });
     })
     .catch(err => {
