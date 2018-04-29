@@ -48,6 +48,9 @@ CREATE TABLE teacher_details (
 CREATE TABLE classes (
     id SERIAL PRIMARY KEY NOT NULL,
     name NETEXT NOT NULL,
+    year NETEXT NOT NULL,
+    term TEXT,
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
     obsolete BOOLEAN NOT NULL DEFAULT FALSE
 );
 

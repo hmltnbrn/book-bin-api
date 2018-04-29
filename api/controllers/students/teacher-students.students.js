@@ -14,7 +14,7 @@ exports.getAll = function (req, res, next) {
 
   if (search) {
     values.push(escape(search));
-    whereParts.push("first_name || last_name ~* $" + values.length);
+    whereParts.push("student_first_name || student_last_name ~* $" + values.length);
   }
 
   values.push(req.user.teacher_id);

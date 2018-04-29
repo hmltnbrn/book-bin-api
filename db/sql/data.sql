@@ -11,10 +11,10 @@ INSERT INTO users (id, username, password, salt, role_id, activated) VALUES
 INSERT INTO teacher_details (id, user_id, title, first_name, last_name, email, grade, school_name, zip) VALUES
  ('9a237f7c6bbd539586f27b43d87183e5','317a22933f23e46593fbabe76ff82d1e','Mr.','Brian','Hamilton','hmltnbrn@gmail.com','6th','Wagner Middle School','11105');
 
-INSERT INTO classes (name) VALUES
- ('613')
-,('614')
-,('615');
+INSERT INTO classes (name, year, term) VALUES
+ ('613', '2017-2018')
+,('614', '2018', 'Spring')
+,('615', '2017', 'Fall');
 
 INSERT INTO teacher_classes (teacher_id, class_id) VALUES
  ('9a237f7c6bbd539586f27b43d87183e5',1)
