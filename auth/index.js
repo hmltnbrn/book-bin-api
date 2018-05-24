@@ -43,7 +43,7 @@ router.post('/SignIn', function(req, res, next) {
         sub: user
       };
       let token = jwt.sign(payload, process.env.JWT_TOKEN_SECRET);
-      return res.status(200).json({ status: true, id: user.id, token: token });
+      return res.status(200).json({ status: true, id: user.user_id, token: token });
     })
     .catch(err => {
       console.log(err);
