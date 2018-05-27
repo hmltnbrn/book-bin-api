@@ -5,23 +5,30 @@ DROP TABLE IF EXISTS
 , activation_tokens
 , checked_out_books
 , teacher_books
-, librarian_details
 , student_classes
 , students
 , teacher_classes
 , classes
+, teacher_student_roles
+, student_details
 , teacher_details
 , users
-, user_roles;
+, student_roles
+, user_types;
 
 /* END DROPS */
 
 /* START CREATES */
 
-CREATE TABLE user_roles (
+CREATE TABLE user_types (
     id SERIAL PRIMARY KEY NOT NULL,
     name TEXT NOT NULL
-); /* Administrator, Teacher, Librarian */
+); /* Administrator, Teacher, Student */
+
+CREATE TABLE student_roles (
+    id SERIAL PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL
+); /* Librarian, Student */
 
 CREATE TABLE users (
     id TEXT PRIMARY KEY NOT NULL,
@@ -29,7 +36,7 @@ CREATE TABLE users (
     password NETEXT NOT NULL,
     salt TEXT NOT NULL,
     register_date BIGINT NOT NULL DEFAULT extract(epoch FROM now()),
-    role_id INTEGER REFERENCES user_roles (id),
+    user_type_id INTEGER REFERENCES user_types (id),
     activated BOOLEAN NOT NULL DEFAULT FALSE
 );
 
@@ -42,7 +49,28 @@ CREATE TABLE teacher_details (
     email EMAIL NOT NULL,
     grade NETEXT NOT NULL,
     school_name NETEXT NOT NULL,
+    zip ZIPCODE NOT NULL,
+    invitation_code CHAR(6) DEFAULT cl_alpha_numeric_code() UNIQUE
+);
+
+CREATE TABLE student_details (
+    id TEXT PRIMARY KEY NOT NULL,
+    user_id TEXT NOT NULL REFERENCES users (id),
+    first_name NETEXT NOT NULL,
+    last_name NETEXT NOT NULL,
+    email EMAIL NOT NULL,
+    grade NETEXT NOT NULL,
+    school_name NETEXT NOT NULL,
     zip ZIPCODE NOT NULL
+);
+
+CREATE TABLE teacher_student_roles (
+    id SERIAL PRIMARY KEY NOT NULL,
+    user_id TEXT NOT NULL REFERENCES users (id),
+    teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
+    student_id TEXT NOT NULL REFERENCES student_details (id),
+    role_id INTEGER REFERENCES student_roles (id),
+    obsolete BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE classes (
@@ -74,18 +102,6 @@ CREATE TABLE student_classes (
     id SERIAL PRIMARY KEY NOT NULL,
     student_id INTEGER NOT NULL REFERENCES students (id),
     class_id INTEGER NOT NULL REFERENCES classes (id)
-);
-
-CREATE TABLE librarian_details (
-    id TEXT PRIMARY KEY NOT NULL,
-    user_id TEXT NOT NULL REFERENCES users (id),
-    teacher_id TEXT NOT NULL REFERENCES teacher_details (id),
-    student_id INTEGER NOT NULL REFERENCES students (id),
-    first_name NETEXT NOT NULL,
-    last_name NETEXT NOT NULL,
-    email EMAIL NOT NULL,
-    zip ZIPCODE NOT NULL,
-    school_name NETEXT NOT NULL
 );
 
 CREATE TABLE teacher_books (

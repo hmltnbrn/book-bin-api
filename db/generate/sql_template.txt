@@ -1,7 +1,3 @@
--- DROP FUNCTIONS
-
--functions_drops-
-
 -- DROP VIEWS
 
 -views_drops-
@@ -9,6 +5,10 @@
 -- DROP TABLES
 
 -tables_drops-
+
+-- DROP FUNCTIONS
+
+-functions_drops-
 
 -- DROP DOMAINS
 
@@ -18,6 +18,10 @@
 
 -domains_creates-
 
+-- CREATE FUNCTIONS
+
+-functions_creates-
+
 -- CREATE TABLES
 
 -tables_creates-
@@ -25,10 +29,6 @@
 -- CREATE DATA
 
 -data_creates-
-
--- CREATE FUNCTIONS
-
--functions_creates-
 
 -- CREATE VIEWS
 
