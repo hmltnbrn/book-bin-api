@@ -1,11 +1,11 @@
 /* START DROPS */
 
 DROP FUNCTION IF EXISTS cl_alpha_numeric_code();
-DROP FUNCTION IF EXISTS cl_sign_up(u_input text, p_input password, t_input text, fn_input text, ln_input text, e_input text, g_input text, sn_input text, z_input text, ut_input integer);
+DROP FUNCTION IF EXISTS cl_sign_up(u_input text, p_input password, t_input text, fn_input text, ln_input text, e_input text, g_input text, sn_input text, z_input text, ut_input integer, teacher_input text);
 DROP FUNCTION IF EXISTS cl_sign_in(u_input text, p_input text);
 DROP FUNCTION IF EXISTS cl_password_token(e_input text);
 DROP FUNCTION IF EXISTS cl_reset_password(e_input text, t_input text, p_input password);
-DROP FUNCTION IF EXISTS cl_change_password(u_input TEXT, op_input TEXT, np_input password);
+DROP FUNCTION IF EXISTS cl_change_password(u_input text, op_input text, np_input password);
 DROP FUNCTION IF EXISTS cl_activate_account(t_input text);
 DROP FUNCTION IF EXISTS cl_forgot_username(e_input text);
 DROP FUNCTION IF EXISTS cl_check_out(t_input text, b_input integer, s_input integer, d_input bigint);
@@ -33,11 +33,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION cl_sign_up(u_input TEXT, p_input PASSWORD, t_input TEXT, fn_input TEXT, ln_input TEXT, e_input TEXT, g_input TEXT, sn_input TEXT, z_input TEXT, ut_input INTEGER)
+CREATE OR REPLACE FUNCTION cl_sign_up(u_input TEXT, p_input PASSWORD, t_input TEXT, fn_input TEXT, ln_input TEXT, e_input TEXT, g_input TEXT, sn_input TEXT, z_input TEXT, ut_input INTEGER, teacher_input TEXT)
 RETURNS TEXT AS $$
 DECLARE
     gen_user_id TEXT;
-    gen_teacher_id TEXT;
+    gen_t_s_id TEXT;
     gen_user_salt TEXT;
     hashed_pass TEXT;
     activation_token TEXT;
@@ -45,13 +45,21 @@ BEGIN
     IF EXISTS(SELECT u.username FROM users u, teacher_details d WHERE u.id = d.user_id AND (u.username = $1 OR d.email = $5)) THEN
         RETURN 'false';
     END IF;
+    IF EXISTS(SELECT u.username FROM users u, student_details d WHERE u.id = d.user_id AND (u.username = $1 OR d.email = $5)) THEN
+        RETURN 'false';
+    END IF;
     SELECT * INTO gen_user_id FROM encode(gen_random_bytes(16), 'hex');
-    SELECT * INTO gen_teacher_id FROM encode(gen_random_bytes(16), 'hex');
+    SELECT * INTO gen_t_s_id FROM encode(gen_random_bytes(16), 'hex');
     SELECT * INTO gen_user_salt FROM gen_salt('bf');
     SELECT * INTO hashed_pass FROM encode(digest($2 || gen_user_salt, 'sha256'), 'hex');
     SELECT * INTO activation_token FROM encode(gen_random_bytes(16), 'hex');
     INSERT INTO users (id, username, password, salt, user_type_id) VALUES (gen_user_id, $1, hashed_pass, gen_user_salt, $10);
-    INSERT INTO teacher_details (id, user_id, title, first_name, last_name, email, grade, school_name, zip) VALUES (gen_teacher_id, gen_user_id, $3, $4, $5, $6, $7, $8, $9);
+    IF $10 = 2 THEN
+        INSERT INTO teacher_details (id, user_id, title, first_name, last_name, email, grade, school_name, zip) VALUES (gen_t_s_id, gen_user_id, $3, $4, $5, $6, $7, $8, $9);
+    ELSE
+        INSERT INTO student_details (id, user_id, first_name, last_name, email, grade, school_name, zip) VALUES (gen_t_s_id, gen_user_id, $4, $5, $6, $7, $8, $9);
+        INSERT INTO teacher_student_roles (user_id, teacher_id, student_id, role_id) VALUES (gen_user_id, $11, gen_t_s_id, 2);
+    END IF;
     INSERT INTO activation_tokens (user_id, token) VALUES (gen_user_id, activation_token);
     RETURN activation_token;
 END

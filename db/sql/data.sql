@@ -11,16 +11,19 @@ INSERT INTO student_roles (name) VALUES
 
 INSERT INTO users (id, username, password, salt, user_type_id, activated) VALUES
  ('317a22933f23e46593fbabe76ff82d1e','hmltnbrn','e970fab4c326d04961148e659985994c183f08a966bb8d725f35dc748699f795','$2a$06$qiGav.GHV1Z3rljxUZcxye',2,TRUE)
-,('5c4c1b2caeb37ce5307437814333cf23','librarian1','e970fab4c326d04961148e659985994c183f08a966bb8d725f35dc748699f795','$2a$06$qiGav.GHV1Z3rljxUZcxye',3,TRUE);
+,('5c4c1b2caeb37ce5307437814333cf23','librarian1','e970fab4c326d04961148e659985994c183f08a966bb8d725f35dc748699f795','$2a$06$qiGav.GHV1Z3rljxUZcxye',3,TRUE)
+,('7215cf6f0a581f6082a8f898c733a766','librarian1','e970fab4c326d04961148e659985994c183f08a966bb8d725f35dc748699f795','$2a$06$qiGav.GHV1Z3rljxUZcxye',3,TRUE);
 
 INSERT INTO teacher_details (id, user_id, title, first_name, last_name, email, grade, school_name, zip) VALUES
  ('9a237f7c6bbd539586f27b43d87183e5','317a22933f23e46593fbabe76ff82d1e','Mr.','Brian','Hamilton','hmltnbrn@gmail.com','6th','Wagner Middle School','11105');
 
 INSERT INTO student_details (id, user_id, first_name, last_name, email, grade, school_name, zip) VALUES
- ('4c94c14e30618dd507d00a4ca2347e58','5c4c1b2caeb37ce5307437814333cf23','Barack','Obama','hmltnbrn@yahoo.com','6th','Wagner Middle School','11105');
+ ('4c94c14e30618dd507d00a4ca2347e58','5c4c1b2caeb37ce5307437814333cf23','Barack','Obama','contactjeffco@gmail.com','6th','Wagner Middle School','11105')
+,('bd10e0335a4d8819e5ff37aedc7b096c','7215cf6f0a581f6082a8f898c733a766','Joseph','Biden','hamiltonian123@hotmail.com','6th','Wagner Middle School','11105');
 
 INSERT INTO teacher_student_roles (user_id, teacher_id, student_id, role_id) VALUES
- ('5c4c1b2caeb37ce5307437814333cf23','9a237f7c6bbd539586f27b43d87183e5','4c94c14e30618dd507d00a4ca2347e58',1);
+ ('5c4c1b2caeb37ce5307437814333cf23','9a237f7c6bbd539586f27b43d87183e5','4c94c14e30618dd507d00a4ca2347e58',1)
+,('7215cf6f0a581f6082a8f898c733a766','9a237f7c6bbd539586f27b43d87183e5','bd10e0335a4d8819e5ff37aedc7b096c',2);
 
 INSERT INTO classes (name, year, term) VALUES
  ('613', '2017-2018', NULL)

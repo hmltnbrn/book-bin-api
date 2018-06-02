@@ -1,6 +1,8 @@
 "use strict";
 
 let nodemailer = require('nodemailer');
+let Email = require('email-templates');
+let path = require('path');
 
 let transporter = nodemailer.createTransport({
   service: 'Gmail',
@@ -17,41 +19,42 @@ let transporter = nodemailer.createTransport({
 
 let baseUrl = process.env.BASE_URL;
 
-exports.activateAccount = function (username, email, token, cb) {
+exports.activateAccount = function (username, emailAddress, firstName, token, cb) {
 
-  let url = baseUrl + '/activate-account/'+ token;
+  let url = `${baseUrl}/activate-account/${token}`;
 
-  let bodyText = 'Hello, ' + username + '!\n\nPlease follow the link below to activate your account:\n\n' + url + '\n\nSincerely,\nThe Classroom Library';
-  let bodyHTML = 'Hello, ' + username + '!<br/><br/>Please follow the link below to activate your account:<br/><br/>' + url + '<br/><br/>Sincerely,<br/>The Classroom Library';
-
-  // setup email data
-  let mailOptions = {
-    from: {
-      name: "Classroom Library",
-      address: process.env.EMAIL
+  const email = new Email({
+    message: {
+      from: process.env.EMAIL
     },
-    sender: {
-      name: "Classroom Library",
-      address: process.env.EMAIL
+    send: true,
+    transport: transporter,
+    views: {
+      options: {
+        extension: 'ejs'
+      },
+      root: path.join(__dirname, 'templates')
     },
-    replyTo: {
-      name: "Classroom Library",
-      address: process.env.EMAIL
-    },
-    to: email, // list of receivers
-    subject: "Activate your account with the Classroom Library",
-    html: bodyHTML,
-    text: bodyText
-  };
+    preview: false
+  });
 
-  // send mail with defined transport object
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.log(error);
-      return cb(error, false);
+  email.send({
+    template: 'welcome',
+    message: {
+      to: emailAddress
+    },
+    locals: {
+      name: firstName,
+      url: url
     }
-    console.log('Message %s sent: %s', info.messageId, info.response);
+  })
+  .then(info => {
+    console.log(`Message ${info.messageId} sent: ${info.response}`);
     return cb(null, true);
+  })
+  .catch(error => {
+    console.log(error);
+    return cb(error, false);
   });
 
 };
